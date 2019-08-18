@@ -1,0 +1,11 @@
+
+*.class
+*.out
+*.properties
+
+bin/
+.classpath
+.project
+
+# emacs backups
+\#*#
