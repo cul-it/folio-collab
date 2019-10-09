@@ -1,4 +1,4 @@
-package edu.cornell.library.folioCollab;
+package edu.cornell.library.folioimpl.tools;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -12,6 +12,10 @@ import javax.xml.stream.XMLStreamException;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import edu.cornell.library.folioimpl.tools.Holding;
+import edu.cornell.library.folioimpl.tools.Holdings;
+import edu.cornell.library.folioimpl.tools.OkapiClient;
 
 public class HoldingsTest {
 

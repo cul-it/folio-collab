@@ -1,4 +1,4 @@
-package edu.cornell.library.folioCollab;
+package edu.cornell.library.folioimpl.tools;
 
 import static org.junit.Assert.assertEquals;
 
@@ -8,6 +8,9 @@ import java.util.Properties;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import edu.cornell.library.folioimpl.tools.OkapiClient;
+import edu.cornell.library.folioimpl.tools.ReferenceData;
 
 public class ReferenceDataTest {
 
