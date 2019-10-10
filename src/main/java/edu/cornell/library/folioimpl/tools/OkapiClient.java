@@ -167,7 +167,7 @@ public class OkapiClient {
     Map<String, Object> rawData = mapper.readValue(readValue, Map.class);
     Map<String,Map<String,Object>> dataMap = new HashMap<>();
     for (String mainKey : rawData.keySet()) 
-      if ( ! mainKey.equals("totalRecords") ) {
+      if ( ! mainKey.equals("totalRecords") && ! mainKey.equals("resultInfo") ) {
         @SuppressWarnings("unchecked")
         List<Map<String,Object>> records = (ArrayList<Map<String,Object>>)rawData.get(mainKey);
         for ( Map<String,Object> record : records )
@@ -180,7 +180,7 @@ public class OkapiClient {
       throws JsonParseException, JsonMappingException, IOException {
     Map<String, Object> rawData = mapper.readValue(readValue, Map.class);
     for (String mainKey : rawData.keySet()) {
-      if ( ! mainKey.equals("totalRecords") ) {
+      if ( ! mainKey.equals("totalRecords") && ! mainKey.equals("resultInfo") ) {
         @SuppressWarnings("unchecked")
         List<Map<String,Object>> records = (ArrayList<Map<String,Object>>)rawData.get(mainKey);
         return records;

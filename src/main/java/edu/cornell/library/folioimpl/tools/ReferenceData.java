@@ -16,7 +16,7 @@ public class ReferenceData {
   // PUBLIC METHODS
 
   /*
-   * Retrieve the complete data set (up to 1000) items from OKAPI, and build a
+   * Retrieve the complete data set (up to 4000) items from OKAPI, and build a
    * reference map to identify UUIDs based on key values. The UUIDs are assumed to
    * be the "id" field in the data set, and the provided key field is the field
    * that will be used to find the UUID values. This currently only works with top
@@ -24,8 +24,8 @@ public class ReferenceData {
    * use cases arise, this can be expanded.
    */
   public ReferenceData(OkapiClient okapi, String endPoint, String keyField) throws IOException {
-    String json = okapi.query(endPoint , null, 1000);
-    dataMap = getMapFromJson(json, keyField);
+    String json = okapi.query(endPoint , null, 4000);
+    this.dataMap = getMapFromJson(json, keyField);
 
   }
 
@@ -34,9 +34,9 @@ public class ReferenceData {
    * return default or null.
    */
   public String getUuid(String keyValue) {
-    if (this.defaultKey == null || dataMap.containsKey(keyValue))
-      return dataMap.get(keyValue);
-    return dataMap.get(defaultKey);
+    if (this.defaultKey == null || this.dataMap.containsKey(keyValue))
+      return this.dataMap.get(keyValue);
+    return this.dataMap.get(this.defaultKey);
   }
 
   /*
@@ -44,7 +44,7 @@ public class ReferenceData {
    * null.
    */
   public String getStrictUuid(String keyValue) {
-    return dataMap.get(keyValue);
+    return this.dataMap.get(keyValue);
   }
 
   /*
@@ -52,13 +52,13 @@ public class ReferenceData {
    * IllegalArgumentException if invalid.
    */
   public void setDefault(String defaultKey) throws IllegalArgumentException {
-    if (defaultKey != null && !dataMap.containsKey(defaultKey))
+    if (defaultKey != null && !this.dataMap.containsKey(defaultKey))
       throw new IllegalArgumentException("Default key \"" + defaultKey + "\" is not a valid key.");
     this.defaultKey = defaultKey;
   }
 
   public void writeMapToStdout() {
-    for (Entry<String, String> e : dataMap.entrySet())
+    for (Entry<String, String> e : this.dataMap.entrySet())
       System.out.printf("%s => %s\n", e.getKey(), e.getValue());
   }
 

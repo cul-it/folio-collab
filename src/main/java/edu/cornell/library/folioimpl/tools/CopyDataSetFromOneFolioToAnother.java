@@ -1,98 +1,131 @@
 package edu.cornell.library.folioimpl.tools;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.rmi.NoSuchObjectException;
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Properties;
+import java.util.Set;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class CopyDataSetFromOneFolioToAnother {
 
-  public static void main(String[] args) throws IOException {
+  private OkapiClient sourceOkapi = null;
+  private OkapiClient destOkapi = null;
+  private String endPoint = null;
+  private boolean deleteUnmatched = true;
 
-    Properties prop = new Properties();
-    try (InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("database.properties")) {
-      prop.load(in);
-    }
+  private ModificationLogic mod = null;
+  private Dependency dependencyFilter = null;
+  private String whiteListField = null;
+  private List<String> whiteList = null;
+  private Set<CreateRecord> satellites = null;
 
-    OkapiClient okapi31 =   new OkapiClient( prop.getProperty("url31dmg"), prop.getProperty("token31dmg") );
-    OkapiClient okapi31sb = new OkapiClient( prop.getProperty("url31sb"),  prop.getProperty("token31sb")  );
-    OkapiClient okapi32dmg =new OkapiClient( prop.getProperty("url32dmg"), prop.getProperty("token32dmg") );
-    OkapiClient okapi32sb = new OkapiClient( prop.getProperty("url32sb"),  prop.getProperty("token32sb")  );
-
-    OkapiClient from = okapi31;
-    OkapiClient to   = okapi32sb;
-
-//    okapi31.deleteAll("/holdings-storage/holdings", true);
-//    okapi31sb.deleteAll("/organizations-storage/organizations", true);
-//    okapi31sb.deleteAll("/organizations-storage/contacts", true);
-//    new CopyDataSetFromOneFolioToAnother(okapi21, okapi31sb, "/organizations-storage/organizations");
-
-
-    to.deleteAll("/service-points-users", true);
-    to.deleteAll("/locations", true);
-    to.deleteAll("/location-units/libraries", true);
-    to.deleteAll("/location-units/campuses", true);
-    CopyDataSetFromOneFolioToAnother.copy(from, to, "/location-units/institutions");
-    CopyDataSetFromOneFolioToAnother.copy(from, to, "/location-units/campuses");
-    CopyDataSetFromOneFolioToAnother.copy(from, to, "/location-units/libraries");
-    CopyDataSetFromOneFolioToAnother.copy(from, to, "/locations");
-    CopyDataSetFromOneFolioToAnother.copy(from, to, "/service-points");
-    CopyDataSetFromOneFolioToAnother.copy(from, to, "/material-types");
-    CopyDataSetFromOneFolioToAnother.copy(from, to, "/loan-types");
-    CopyDataSetFromOneFolioToAnother.copy(from, to, "/groups");
-
-  }
 
   public static void copy( OkapiClient okapi1, OkapiClient okapi2, String endPoint )
       throws IOException {
-    doTheThing( okapi1, okapi2, endPoint, null, null, null, null );
+    doTheThing( okapi1, okapi2, endPoint, true, null, null, null, null, null );
   }
 
-  public static void dependencyFilteredCopy(
-      OkapiClient okapi1, OkapiClient okapi2, String endPoint, Dependency filter ) throws IOException {
-    doTheThing( okapi1, okapi2, endPoint, null, filter, null, null );
+  public void execute() throws IOException {
+    doTheThing(
+        this.sourceOkapi, this.destOkapi, this.endPoint, this.deleteUnmatched,
+        this.mod, this.dependencyFilter, this.whiteListField, this.whiteList, this.satellites );
   }
 
-  public static void modifiedCopy( OkapiClient okapi1, OkapiClient okapi2, String endPoint, ModificationLogic mod )
-      throws IOException {
-    doTheThing( okapi1, okapi2, endPoint, mod, null, null, null );
+  CopyDataSetFromOneFolioToAnother(
+      OkapiClient sourceOkapi, OkapiClient destOkapi, String endPoint, boolean deleteUnmatched, ModificationLogic mod,
+      Dependency dependency, String whiteListField, List<String> whiteList, Set<CreateRecord> satellites) {
+    this.sourceOkapi = sourceOkapi;
+    this.destOkapi = destOkapi;
+    this.endPoint = endPoint;
+    this.mod = mod;
+    this.deleteUnmatched = deleteUnmatched;
+    this.dependencyFilter = dependency;
+    this.whiteListField = whiteListField;
+    this.whiteList = whiteList;
+    this.satellites = satellites;
   }
 
-  public static void dependencyFilteredAndModifiedCopy(
-      OkapiClient okapi1, OkapiClient okapi2, String endPoint, Dependency filter, ModificationLogic mod )
-          throws IOException {
-    doTheThing( okapi1, okapi2, endPoint, mod, filter, null, null );
-  }
+  public static class Builder {
 
-  public static void whiteListFilteredCopy(
-      OkapiClient okapi1, OkapiClient okapi2, String endPoint, String whiteListField, ArrayList<String> whiteList )
-      throws IOException {
-    doTheThing( okapi1, okapi2, endPoint, null, null, whiteListField, whiteList );
-  }
+    private OkapiClient sourceOkapi = null;
+    private OkapiClient destOkapi = null;
+    private String endPoint = null;
+    private boolean deleteUnmatched = true;
 
-  public static void whiteListFilteredAndModifiedCopy(
-      OkapiClient okapi1, OkapiClient okapi2, String endPoint,
-      String whiteListField, ArrayList<String> whiteList, ModificationLogic mod )
-      throws IOException {
-    doTheThing( okapi1, okapi2, endPoint, mod, null, whiteListField, whiteList );
+    private ModificationLogic mod = null;
+    private Dependency dependencyFilter = null;
+    private String whiteListField = null;
+    private List<String> whiteList = null;
+    private Set<CreateRecord> satellites = null;
+
+    public Builder setSourceOkapi( OkapiClient sourceOkapi ) {
+      this.sourceOkapi = sourceOkapi;
+      return this;
+    }
+
+    public Builder setDestOkapi( OkapiClient destOkapi ) {
+      this.destOkapi = destOkapi;
+      return this;
+    }
+
+    public Builder setEndPoint( String endPoint ) {
+      this.endPoint = endPoint;
+      return this;
+    }
+
+    public Builder setDeleteUnmatched( boolean deleteUnmatched ) {
+      this.deleteUnmatched = deleteUnmatched;
+      return this;
+    }
+
+    public Builder setDependencyFilter( Dependency dependencyFilter ) {
+      this.dependencyFilter = dependencyFilter;
+      return this;
+    }
+
+    public Builder setWhiteListFilter( String whiteListField, List<String> whiteList ) {
+      this.whiteListField = whiteListField;
+      this.whiteList = whiteList;
+      return this;
+    }
+
+    public Builder setSatellites( Set<CreateRecord> satellites ) {
+      this.satellites = satellites;
+      return this;
+    }
+
+    public Builder addSatellite( CreateRecord satellite ) {
+      if ( this.satellites == null ) this.satellites = new HashSet<>();
+      this.satellites.add(satellite);
+      return this;
+    }
+
+    public Builder setModificationLogic( ModificationLogic modificationLogic ) {
+      this.mod = modificationLogic;
+      return this;
+    }
+
+    public CopyDataSetFromOneFolioToAnother build() throws IllegalArgumentException {
+      return new CopyDataSetFromOneFolioToAnother(this.sourceOkapi,this.destOkapi,this.endPoint,this.deleteUnmatched,
+          this.mod,this.dependencyFilter,this.whiteListField,this.whiteList,this.satellites);
+    }
+
   }
 
   private static void doTheThing(
-      OkapiClient okapi1, OkapiClient okapi2, String endPoint, ModificationLogic mod,
-      Dependency dependency, String whiteListField, ArrayList<String> whiteList )
+      OkapiClient sourceOkapi, OkapiClient destOkapi, String endPoint, boolean deleteUnmatched, ModificationLogic mod,
+      Dependency dependency, String whiteListField, List<String> whiteList, Set<CreateRecord> satellites )
       throws IOException {
 
     int maxDataSetSize = 15000;
 
     // Pull values from source system
-    String sourceJson = okapi1.query(endPoint, null, maxDataSetSize);
+    String sourceJson = sourceOkapi.query(endPoint, null, maxDataSetSize);
     if ( maxDataSetSize < (Integer)mapper.readValue(sourceJson,Map.class).get("totalRecords") )
       throw new UnsupportedOperationException(
           "Method available for endpoints of no more than "+maxDataSetSize+" records.");
@@ -104,7 +137,7 @@ public class CopyDataSetFromOneFolioToAnother {
         mod.modify(sourceRecord);
 
     // Pull values from target system for comparison
-    Map<String,Map<String,Object>> dataOnTarget = okapi2.queryAsMap(endPoint, null, maxDataSetSize);
+    Map<String,Map<String,Object>> dataOnTarget = destOkapi.queryAsMap(endPoint, null, maxDataSetSize);
 
     Map<String,Boolean> dependenciesPresent = new HashMap<>();
 
@@ -120,7 +153,7 @@ public class CopyDataSetFromOneFolioToAnother {
         if ( dependenciesPresent.containsKey(foreignKey) ) {
           if ( ! dependenciesPresent.get(foreignKey) ) continue;
         } else try {
-          okapi1.getRecord(dependency.endPoint,foreignKey);
+          sourceOkapi.getRecord(dependency.endPoint,foreignKey);
           dependenciesPresent.put(foreignKey,true);
         } catch (@SuppressWarnings("unused") NoSuchObjectException e ) {
           dependenciesPresent.put(foreignKey,false);
@@ -139,8 +172,13 @@ public class CopyDataSetFromOneFolioToAnother {
 
       //If new record. Add it.
       if ( ! dataOnTarget.containsKey(id) ) {
-        okapi2.post(endPoint,mapper.writeValueAsString(record));
+        destOkapi.post(endPoint,mapper.writeValueAsString(record));
         System.out.println("Added: "+endPoint+' '+mapper.writeValueAsString(record));
+        if ( satellites != null )
+          for (CreateRecord cr : satellites) {
+            Map<String,Object> satRecord = cr.buildRecord(record);
+            destOkapi.post(cr.getEndPoint(),mapper.writeValueAsString(satRecord));
+          }
         continue;
       }
 
@@ -156,17 +194,19 @@ public class CopyDataSetFromOneFolioToAnother {
       // Else changed record. Update it.
       } else {
         dataOnTarget.remove(id);
-        okapi2.put(endPoint,record);
+        destOkapi.put(endPoint,record);
         System.out.println("Updated: "+endPoint+' '+mapper.writeValueAsString(record));
       }
     }
 
     // Delete target system records not reflected in source system
-    for (String key : dataOnTarget.keySet()) {
-      System.out.printf("deleting %s/%s %s\n",endPoint,key,mapper.writeValueAsString(dataOnTarget.get(key)));
-      okapi2.delete(endPoint, key);
-    }
+    if ( deleteUnmatched )
+      for (String key : dataOnTarget.keySet()) {
+        System.out.printf("deleting %s/%s %s\n",endPoint,key,mapper.writeValueAsString(dataOnTarget.get(key)));
+        destOkapi.delete(endPoint, key);
+      }
   }
+
 
   private static ObjectMapper mapper = new ObjectMapper();
 }
