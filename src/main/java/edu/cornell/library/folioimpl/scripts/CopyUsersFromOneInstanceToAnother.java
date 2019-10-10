@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Random;
@@ -29,14 +30,17 @@ public class CopyUsersFromOneInstanceToAnother {
     OkapiClient okapi32sb = new OkapiClient( prop.getProperty("url32sb"),  prop.getProperty("token32sb")  );
 
     OkapiClient from = okapi31sb;
-    OkapiClient to = okapi32dmg;
+    OkapiClient to = okapi32sb;
 
     ReferenceData patronGroups = new ReferenceData( to, "/groups", "group");
     ReferenceData permissions =  new ReferenceData( to, "/perms/permissions", "displayName");
 
+    List<String> dmgUserList = Arrays.asList(prop.getProperty("migrationteam").split(","));
+    List<String> sbUserList = Arrays.asList(prop.getProperty("allusers").split(","));
+
     CopyDataSetFromOneFolioToAnother.Builder users = new CopyDataSetFromOneFolioToAnother.Builder();
     users.setSourceOkapi(from).setDestOkapi(to).setEndPoint("/users").setDeleteUnmatched(false);
-    users.setWhiteListFilter("username",Arrays.asList("fbw4","rld244","jrc88","jrm424","nac26"));
+    users.setWhiteListFilter("username",sbUserList);
     users.setModificationLogic(
         new ModificationLogic() {
           @Override
@@ -73,7 +77,7 @@ public class CopyUsersFromOneInstanceToAnother {
 
 
     CopyDataSetFromOneFolioToAnother.Builder servicePointUsers = new CopyDataSetFromOneFolioToAnother.Builder();
-    servicePointUsers.setSourceOkapi(from).setSourceOkapi(to).setEndPoint("/service-points-users");
+    servicePointUsers.setSourceOkapi(from).setDestOkapi(to).setEndPoint("/service-points-users");
     servicePointUsers.setDependencyFilter(new Dependency("userId","/users"));
     servicePointUsers.build().execute();
   }
