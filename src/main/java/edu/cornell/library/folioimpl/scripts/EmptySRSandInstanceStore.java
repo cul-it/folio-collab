@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
-import edu.cornell.library.folioimpl.tools.OkapiClient;
+import edu.cornell.library.folioimpl.objects.OkapiClient;
 
 public class EmptySRSandInstanceStore {
 

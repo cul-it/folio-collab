@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
+import edu.cornell.library.folioimpl.objects.OkapiClient;
 import edu.cornell.library.folioimpl.tools.CopyDataSetFromOneFolioToAnother;
-import edu.cornell.library.folioimpl.tools.OkapiClient;
 
 public class PopulateBaseReferenceDataFromOneInstanceToAnother {
 

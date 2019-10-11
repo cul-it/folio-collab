@@ -10,6 +10,9 @@ import java.util.List;
 
 import javax.xml.stream.XMLStreamException;
 
+import edu.cornell.library.folioimpl.objects.Holding;
+import edu.cornell.library.folioimpl.objects.OkapiClient;
+
 public class Holdings {
 
   private static PreparedStatement holdingsForBibPstmt = null;

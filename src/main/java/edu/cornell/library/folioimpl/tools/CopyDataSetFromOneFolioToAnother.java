@@ -14,6 +14,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.cornell.library.folioimpl.interfaces.CreateRecord;
 import edu.cornell.library.folioimpl.interfaces.ModificationLogic;
 import edu.cornell.library.folioimpl.objects.Dependency;
+import edu.cornell.library.folioimpl.objects.OkapiClient;
 
 public class CopyDataSetFromOneFolioToAnother {
 

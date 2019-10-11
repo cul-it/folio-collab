@@ -1,4 +1,4 @@
-package edu.cornell.library.folioimpl.tools;
+package edu.cornell.library.folioimpl.scripts;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -16,6 +16,11 @@ import java.util.Properties;
 import java.util.regex.Pattern;
 
 import javax.xml.stream.XMLStreamException;
+
+import edu.cornell.library.folioimpl.objects.Holding;
+import edu.cornell.library.folioimpl.objects.OkapiClient;
+import edu.cornell.library.folioimpl.objects.ReferenceData;
+import edu.cornell.library.folioimpl.tools.Holdings;
 
 public class GetHoldingsForInstances {
 

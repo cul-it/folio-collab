@@ -12,9 +12,9 @@ import java.util.Random;
 import edu.cornell.library.folioimpl.interfaces.CreateRecord;
 import edu.cornell.library.folioimpl.interfaces.ModificationLogic;
 import edu.cornell.library.folioimpl.objects.Dependency;
+import edu.cornell.library.folioimpl.objects.OkapiClient;
+import edu.cornell.library.folioimpl.objects.ReferenceData;
 import edu.cornell.library.folioimpl.tools.CopyDataSetFromOneFolioToAnother;
-import edu.cornell.library.folioimpl.tools.OkapiClient;
-import edu.cornell.library.folioimpl.tools.ReferenceData;
 
 public class CopyUsersFromOneInstanceToAnother {
 

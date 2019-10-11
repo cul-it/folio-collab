@@ -1,4 +1,4 @@
-package edu.cornell.library.folioimpl.tools;
+package edu.cornell.library.folioimpl.objects;
 
 import java.io.IOException;
 import java.sql.Connection;
@@ -14,6 +14,7 @@ import javax.xml.stream.XMLStreamException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import edu.cornell.library.folioimpl.tools.DownloadMarc;
 import edu.cornell.library.integration.marc.DataField;
 import edu.cornell.library.integration.marc.MarcRecord;
 import edu.cornell.library.integration.marc.Subfield;
@@ -21,7 +22,7 @@ import edu.cornell.library.integration.marc.MarcRecord.RecordType;
 
 public class Holding {
 
-  MarcRecord marc;
+  public MarcRecord marc;
   Map<String, Object> holding = new HashMap<>();
   public String locationCode = null;
   private static ObjectMapper mapper = new ObjectMapper();

@@ -12,8 +12,8 @@ import javax.xml.stream.XMLStreamException;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import edu.cornell.library.folioimpl.tools.Holding;
-import edu.cornell.library.folioimpl.tools.OkapiClient;
+import edu.cornell.library.folioimpl.objects.Holding;
+import edu.cornell.library.folioimpl.objects.OkapiClient;
 
 public class HoldingTest {
 

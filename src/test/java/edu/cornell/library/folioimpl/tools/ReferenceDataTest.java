@@ -9,8 +9,8 @@ import java.util.Properties;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import edu.cornell.library.folioimpl.tools.OkapiClient;
-import edu.cornell.library.folioimpl.tools.ReferenceData;
+import edu.cornell.library.folioimpl.objects.OkapiClient;
+import edu.cornell.library.folioimpl.objects.ReferenceData;
 
 public class ReferenceDataTest {
 
