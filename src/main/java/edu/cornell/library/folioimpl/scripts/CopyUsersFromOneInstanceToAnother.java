@@ -9,10 +9,10 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Random;
 
+import edu.cornell.library.folioimpl.interfaces.CreateRecord;
+import edu.cornell.library.folioimpl.interfaces.ModificationLogic;
+import edu.cornell.library.folioimpl.objects.Dependency;
 import edu.cornell.library.folioimpl.tools.CopyDataSetFromOneFolioToAnother;
-import edu.cornell.library.folioimpl.tools.CreateRecord;
-import edu.cornell.library.folioimpl.tools.Dependency;
-import edu.cornell.library.folioimpl.tools.ModificationLogic;
 import edu.cornell.library.folioimpl.tools.OkapiClient;
 import edu.cornell.library.folioimpl.tools.ReferenceData;
 
@@ -43,16 +43,14 @@ public class CopyUsersFromOneInstanceToAnother {
     users.setWhiteListFilter("username",sbUserList);
     users.setModificationLogic(
         new ModificationLogic() {
-          @Override
-          public boolean modify(Map<String, Object> user) {
+          @Override public boolean modify(Map<String, Object> user) {
             boolean changed = false;
             if ( ! user.containsKey("barcode" ) )
             { Random r = new Random(); user.put("barcode",r.nextInt(Integer.MAX_VALUE)); changed = true; }
             if ( ! user.containsKey("patronGroup" ) )
             { user.put("patronGroup",patronGroups.getUuid("STAF")); changed = true; }
             return changed;
-          }
-        });
+          }});
     users.addSatellite(
         new CreateRecord() {
           @Override public String getEndPoint() { return "/perms/users"; }

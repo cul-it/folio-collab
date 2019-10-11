@@ -6,6 +6,8 @@ import java.util.Map;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import edu.cornell.library.folioimpl.interfaces.ModificationLogic;
+
 public class SelectAndModifyRecords {
 
   public static void run( OkapiClient okapi, String endPoint, String query , ModificationLogic mod )

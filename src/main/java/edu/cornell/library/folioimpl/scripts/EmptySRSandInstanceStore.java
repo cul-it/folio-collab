@@ -1,8 +1,10 @@
-package edu.cornell.library.folioimpl.tools;
+package edu.cornell.library.folioimpl.scripts;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
+
+import edu.cornell.library.folioimpl.tools.OkapiClient;
 
 public class EmptySRSandInstanceStore {
 

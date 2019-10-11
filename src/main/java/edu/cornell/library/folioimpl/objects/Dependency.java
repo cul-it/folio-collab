@@ -1,4 +1,4 @@
-package edu.cornell.library.folioimpl.tools;
+package edu.cornell.library.folioimpl.objects;
 
 public class Dependency {
 

@@ -11,6 +11,10 @@ import java.util.Set;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import edu.cornell.library.folioimpl.interfaces.CreateRecord;
+import edu.cornell.library.folioimpl.interfaces.ModificationLogic;
+import edu.cornell.library.folioimpl.objects.Dependency;
+
 public class CopyDataSetFromOneFolioToAnother {
 
   private OkapiClient sourceOkapi = null;
