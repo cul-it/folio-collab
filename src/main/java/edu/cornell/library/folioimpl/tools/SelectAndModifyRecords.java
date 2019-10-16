@@ -12,14 +12,68 @@ import edu.cornell.library.folioimpl.interfaces.ModificationLogic;
 import edu.cornell.library.folioimpl.objects.OkapiClient;
 
 public class SelectAndModifyRecords {
-  
+
   private OkapiClient okapi;
   private String endPoint;
   private String query;
   private MatchingLogic match;
   private ModificationLogic mod;
 
-  public static void run(OkapiClient okapi,String endPoint,String query,MatchingLogic match,ModificationLogic mod)
+  public void execute() throws IOException {
+    doTheThing( this.okapi, this.endPoint, this.query, this.match, this.mod);
+  }
+
+  public static class Builder {
+
+    private OkapiClient okapi = null;
+    private String endPoint = null;
+    private String query = null;
+    private MatchingLogic match = null;
+    private ModificationLogic mod = null;
+
+    public Builder setOkapiClient( OkapiClient okapi ) {
+      this.okapi = okapi;
+      return this;
+    }
+
+    public Builder setEndPoint( String endPoint ) {
+      this.endPoint = endPoint;
+      return this;
+    }
+
+    public Builder setModificationLogic( ModificationLogic mod ) {
+      this.mod = mod;
+      return this;
+    }
+
+    public Builder setQuery( String query ) {
+      this.query = query;
+      return this;
+    }
+
+    public Builder setMatchingLogic( MatchingLogic match ) {
+      this.match = match;
+      return this;
+    }
+
+    public SelectAndModifyRecords build() throws IllegalArgumentException {
+      if ( this.okapi == null || this.endPoint == null || this.mod == null )
+        throw new IllegalArgumentException("OkapiClient, end point, and ModificationLogic must all be specified.");
+      return new SelectAndModifyRecords( this.okapi, this.endPoint, this.query, this.match, this.mod );
+    }
+
+  }
+
+  SelectAndModifyRecords(OkapiClient okapi,String endPoint,String query,MatchingLogic match,ModificationLogic mod) {
+    this.okapi = okapi;
+    this.endPoint = endPoint;
+    this.query = query;
+    this.match = match;
+    this.mod = mod;
+  }
+
+  private static void doTheThing(
+      OkapiClient okapi,String endPoint,String query,MatchingLogic match,ModificationLogic mod)
       throws IOException {
 
     int maxDataSetSize = 15000;
