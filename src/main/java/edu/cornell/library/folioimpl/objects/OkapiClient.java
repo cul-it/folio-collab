@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -97,23 +98,15 @@ public class OkapiClient {
     Map<String,Map<String,Object>> existing = queryAsMap(endPoint,notDeletedQuery, null);
 
     while ( ! existing.isEmpty() ) {
-      for ( String uuid : existing.keySet() ) {
-        sb.append("Deleting ").append(endPoint).append('/').append(uuid)
-          .append(' ').append(mapper.writeValueAsString(existing.get(uuid))).append('\n');
-        HttpURLConnection c = commonConnectionSetup(endPoint+"/"+uuid);
-        c.setRequestMethod("DELETE");
-        try ( BufferedReader br = new BufferedReader(new InputStreamReader(c.getInputStream(), "utf-8")) ) {
-          String line = null;
-          while ((line = br.readLine()) != null) {
-            if ( ! line.isEmpty() && ! line.trim().isEmpty() )
-              sb.append(line).append('\n');
-          }
+      String output = existing.keySet().parallelStream().map(uuid -> {
+        try {
+          return String.format("Deleting %s/%s %s\n", endPoint,uuid, delete(endPoint,uuid));
+        } catch (Exception e) {
+          return e.getMessage();
         }
-        if ( verbose ) {
-          System.out.println(sb.toString());
-          sb.setLength(0);
-        }
-      }
+      }).collect(Collectors.joining("\n"));
+      if (verbose)
+        System.out.println(output);
       existing = queryAsMap(endPoint,notDeletedQuery, null);
 
     }

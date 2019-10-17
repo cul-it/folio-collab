@@ -3,11 +3,13 @@ package edu.cornell.library.folioimpl.objects;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
 import java.util.Objects;
+import java.util.Set;
 import java.util.TreeSet;
 
 public class MarcRecord {
@@ -82,7 +84,6 @@ public class MarcRecord {
     }
   }
 
-
   @Override public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append(this.leader).append('\n');
@@ -97,6 +98,54 @@ public class MarcRecord {
     }
     return sb.toString();
   }
+
+
+  /**
+   * Make a comparison between two MARC records, listing fields for each that don't appear in the
+   * other. "this" record fields so noted will be preceded by "- " at the beginning of each line,
+   * while "o" record fields will be preceded by "+ ". This comparison does not attempt to capture
+   * instances of field reordering.
+   * @param o - other MarcRecord for comparison
+   * @return differences string
+   */
+  public String differences(MarcRecord o) {
+    StringBuilder sb = new StringBuilder();
+    if ( ! Objects.equals(this.leader, o.leader) )
+      sb.append("- ").append(this.leader).append("\n+ ").append(o.leader).append('\n');
+    Set<MarcRecord.ControlField> matchingControlFieldsA = new HashSet<>();
+    Set<MarcRecord.ControlField> matchingControlFieldsB = new HashSet<>();
+    FIELD: for ( MarcRecord.ControlField f : this.controlFields )
+      for ( MarcRecord.ControlField g : o.controlFields ) 
+        if ( ! matchingControlFieldsB.contains(g) && f.tag.equals(g.tag) && f.value.equals(g.value) ) {
+          matchingControlFieldsA.add(f);
+          matchingControlFieldsB.add(g);
+          continue FIELD;
+        }
+    for ( MarcRecord.ControlField f : matchingControlFieldsA ) this.controlFields.remove(f);
+    for ( MarcRecord.ControlField g : matchingControlFieldsB ) o.controlFields.remove(g);
+    for ( MarcRecord.ControlField f : this.controlFields )
+      sb.append("- ").append(f.tag).append(' ').append(f.value).append('\n');
+    for ( MarcRecord.ControlField g : o.controlFields )
+      sb.append("+ ").append(g.tag).append(' ').append(g.value).append('\n');
+
+    Set<MarcRecord.DataField> matchingDataFieldsA = new HashSet<>();
+    Set<MarcRecord.DataField> matchingDataFieldsB = new HashSet<>();
+    FIELD: for ( MarcRecord.DataField f : this.dataFields )
+      for ( MarcRecord.DataField g : o.dataFields ) 
+        if ( ! matchingDataFieldsB.contains(g) && f.toString().equals(g.toString()) ) {
+          matchingDataFieldsA.add(f);
+          matchingDataFieldsB.add(g);
+          continue FIELD;
+        } 
+    for ( MarcRecord.DataField f : matchingDataFieldsA ) this.dataFields.remove(f);
+    for ( MarcRecord.DataField g : matchingDataFieldsB ) o.dataFields.remove(g);
+    for ( MarcRecord.DataField f : this.dataFields )
+      sb.append("- ").append(f.toString()).append('\n');
+    for ( MarcRecord.DataField g : o.dataFields )
+      sb.append("+ ").append(g.toString()).append('\n');
+    return sb.toString();
+  }
+
 
   public static enum RecordType {
     BIBLIOGRAPHIC, HOLDINGS, AUTHORITY
@@ -139,7 +188,7 @@ public class MarcRecord {
     public Character ind2 = ' ';
     public TreeSet<Subfield> subfields = new TreeSet<>();
 
-    public Integer linkNumber; //from MARC subfield 6
+    public Integer linkNumber = null; //from MARC subfield 6
     public String mainTag = null;
 
     public DataField(int id, String tag, char ind1, char ind2, TreeSet<Subfield> subfields) {
@@ -190,7 +239,6 @@ public class MarcRecord {
           return RLE_openRTL+val+PDF_closeRTL;
       }
       return val;
-      
     }
 
     @Override public int compareTo(final DataField other) { return Integer.compare(this.id, other.id); }

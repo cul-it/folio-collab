@@ -72,7 +72,7 @@ public class Holding {
     String s = null;
     try {
       s = mapper.writeValueAsString(this.holding);
-    } catch (@SuppressWarnings("unused") JsonProcessingException e) {}
+    } catch (JsonProcessingException e) {}
     return s;
   }
 

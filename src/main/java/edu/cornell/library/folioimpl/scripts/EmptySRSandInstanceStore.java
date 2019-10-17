@@ -16,9 +16,9 @@ public class EmptySRSandInstanceStore {
       prop.load(in);
     }
 
-    OkapiClient okapi31 = new OkapiClient(prop.getProperty("url31dmg"),prop.getProperty("token31dmg"));
-    okapi31.deleteAll("/source-storage/records", "deleted==false", true);
-    okapi31.deleteAll("/instance-storage/instances", true);
+    OkapiClient okapi32dmg = new OkapiClient(prop.getProperty("url32dmg"),prop.getProperty("token32dmg"));
+    okapi32dmg.deleteAll("/source-storage/records", "deleted==false", true);
+    okapi32dmg.deleteAll("/instance-storage/instances", true);
   }
 
 }
