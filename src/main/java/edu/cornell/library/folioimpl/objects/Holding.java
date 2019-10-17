@@ -9,16 +9,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.xml.stream.XMLStreamException;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.cornell.library.folioimpl.tools.DownloadMarc;
-import edu.cornell.library.integration.marc.DataField;
-import edu.cornell.library.integration.marc.MarcRecord;
-import edu.cornell.library.integration.marc.Subfield;
-import edu.cornell.library.integration.marc.MarcRecord.RecordType;
 
 public class Holding {
 
@@ -31,8 +25,7 @@ public class Holding {
   private static ReferenceData locations = null;
   private static ReferenceData callNumberTypes = null;
 
-  public Holding(Connection voyager, OkapiClient okapi, Integer recordId)
-      throws SQLException, IOException, XMLStreamException {
+  public Holding(Connection voyager, OkapiClient okapi, Integer recordId) throws SQLException, IOException {
 
     if (holdingNoteTypes == null)
       holdingNoteTypes = new ReferenceData(okapi, "/holdings-note-types", "name");
@@ -44,7 +37,7 @@ public class Holding {
     }
     if (callNumberTypes == null)
       callNumberTypes = new ReferenceData(okapi, "/call-number-types", "name");
-    this.marc = DownloadMarc.get(voyager, RecordType.HOLDINGS, recordId);
+    this.marc = DownloadMarc.get(voyager, MarcRecord.RecordType.HOLDINGS, recordId);
     this.setVoyagerMfhdId(recordId);
     processMarcData();
 
@@ -85,11 +78,11 @@ public class Holding {
 
   @SuppressWarnings("unchecked")
   private void processMarcData() {
-    for (DataField f : this.marc.dataFields)
+    for (MarcRecord.DataField f : this.marc.dataFields)
       switch (f.mainTag) {
       case "852":
         List<String> callNumberParts = new ArrayList<>();
-        for (Subfield sf : f.subfields)
+        for (MarcRecord.Subfield sf : f.subfields)
           switch (sf.code) {
           case 'b':
             this.holding.put("holdingsTypeId", (sf.value.contains("serv,remo"))
@@ -139,7 +132,7 @@ public class Holding {
             this.holding.put("callNumberTypeId", callNumberTypes.getUuid("Title"));
             break;
           case '7':
-            for (Subfield sf : f.subfields)
+            for (MarcRecord.Subfield sf : f.subfields)
               if (sf.code.equals('7') && sf.value.equals("lcc"))
                 this.holding.put("callNumberTypeId", callNumberTypes.getUuid("Library of Congress classification"));
             break;
@@ -151,7 +144,7 @@ public class Holding {
       case "867":
       case "868":
         Map<String, String> holdingDescription = new HashMap<>();
-        for (Subfield sf : f.subfields)
+        for (MarcRecord.Subfield sf : f.subfields)
           if (sf.code.equals('a'))
             holdingDescription.put("statement", sf.value);
           else if (sf.code.equals('z'))
@@ -172,25 +165,25 @@ public class Holding {
         this.holding.put(field, stmtlist);
         break;
       case "506":
-        addHoldingNote(holdingNoteTypes.getUuid("Restriction"), f.concatenateSpecificSubfields("3abcdefgqu"), false);
+        addHoldingNote(holdingNoteTypes.getUuid("Restriction"), f.concatSubfields("3abcdefgqu"), false);
         break;
       case "561":
-        addHoldingNote(holdingNoteTypes.getUuid("Provenance"), f.concatenateSpecificSubfields("3au"), false);
+        addHoldingNote(holdingNoteTypes.getUuid("Provenance"), f.concatSubfields("3au"), false);
         break;
       case "562":
-        addHoldingNote(holdingNoteTypes.getUuid("Copy note"), f.concatenateSpecificSubfields("3abcde"), false);
+        addHoldingNote(holdingNoteTypes.getUuid("Copy note"), f.concatSubfields("3abcde"), false);
         break;
       case "563":
-        addHoldingNote(holdingNoteTypes.getUuid("Binding"), f.concatenateSpecificSubfields("3au"), false);
+        addHoldingNote(holdingNoteTypes.getUuid("Binding"), f.concatSubfields("3au"), false);
         break;
       case "583": // public and non-public note as only part of a note that must be public or
                   // nonpublic. :-P
         /* Examples with both m2522212 b2085444 m4773819 b4219530 m6731034 b5782601 */
-        addHoldingNote(holdingNoteTypes.getUuid("Action note"), f.concatenateSpecificSubfields("3abcdefhijklnouxz"),
+        addHoldingNote(holdingNoteTypes.getUuid("Action note"), f.concatSubfields("3abcdefhijklnouxz"),
             false);
         break;
       case "843":
-        addHoldingNote(holdingNoteTypes.getUuid("Reproduction"), f.concatenateSpecificSubfields("3abcdefmn"), false);
+        addHoldingNote(holdingNoteTypes.getUuid("Reproduction"), f.concatSubfields("3abcdefmn"), false);
         break;
       default:
 //        System.out.println(f.toString());

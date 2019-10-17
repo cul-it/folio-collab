@@ -56,7 +56,7 @@ public class CompareSRSJsonWithRawMarc {
     Set<MarcRecord.ControlField> matchingControlFieldsB = new HashSet<>();
     FIELD: for ( MarcRecord.ControlField f : a.controlFields )
       for ( MarcRecord.ControlField g : b.controlFields ) 
-        if ( f.tag.equals(g.tag) && f.value.equals(g.value) ) {
+        if ( ! matchingControlFieldsB.contains(g) && f.tag.equals(g.tag) && f.value.equals(g.value) ) {
           matchingControlFieldsA.add(f);
           matchingControlFieldsB.add(g);
           continue FIELD;
@@ -72,7 +72,7 @@ public class CompareSRSJsonWithRawMarc {
     Set<MarcRecord.DataField> matchingDataFieldsB = new HashSet<>();
     FIELD: for ( MarcRecord.DataField f : a.dataFields )
       for ( MarcRecord.DataField g : b.dataFields ) 
-        if ( f.toString().equals(g.toString()) ) {
+        if ( ! matchingDataFieldsB.contains(g) && f.toString().equals(g.toString()) ) {
           matchingDataFieldsA.add(f);
           matchingDataFieldsB.add(g);
           continue FIELD;

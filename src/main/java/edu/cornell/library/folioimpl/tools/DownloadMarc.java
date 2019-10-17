@@ -2,26 +2,23 @@ package edu.cornell.library.folioimpl.tools;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import javax.xml.stream.XMLStreamException;
+import edu.cornell.library.folioimpl.objects.MarcRecord;
 
-import edu.cornell.library.integration.marc.MarcRecord;
-import edu.cornell.library.integration.marc.MarcRecord.RecordType;
 
 public class DownloadMarc {
 
-  public static MarcRecord get(Connection voyager, RecordType type, Integer recordId)
-      throws SQLException, IOException, XMLStreamException {
+  public static MarcRecord get(Connection voyager, MarcRecord.RecordType type, Integer recordId)
+      throws SQLException, IOException {
 
     String query;
-    if (type.equals(RecordType.BIBLIOGRAPHIC))
+    if (type.equals(MarcRecord.RecordType.BIBLIOGRAPHIC))
       query = "SELECT * FROM BIB_DATA WHERE BIB_DATA.BIB_ID = ? ORDER BY BIB_DATA.SEQNUM";
-    else if (type.equals(RecordType.HOLDINGS))
+    else if (type.equals(MarcRecord.RecordType.HOLDINGS))
       query = "SELECT * FROM MFHD_DATA WHERE MFHD_DATA.MFHD_ID = ? ORDER BY MFHD_DATA.SEQNUM";
     else
       query = "SELECT * FROM AUTH_DATA WHERE AUTH_DATA.AUTH_ID = ? ORDER BY AUTH_DATA.SEQNUM";
@@ -36,8 +33,7 @@ public class DownloadMarc {
       if (bb.size() == 0)
         return null;
       bb.close();
-      String record = new String(bb.toByteArray(), StandardCharsets.UTF_8);
-      return new MarcRecord(type, record);
+      return new MarcRecord(bb.toByteArray());
     }
   }
 }

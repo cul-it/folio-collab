@@ -8,8 +8,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.xml.stream.XMLStreamException;
-
 import edu.cornell.library.folioimpl.objects.Holding;
 import edu.cornell.library.folioimpl.objects.OkapiClient;
 
@@ -19,8 +17,7 @@ public class Holdings {
   private static PreparedStatement uuidForHoldingsPstmt = null;
 
   public static List<Holding> getHoldingsForBibRecord(
-      Connection voyager, OkapiClient okapi, Integer bibId, String instanceUuid)
-          throws SQLException, IOException, XMLStreamException {
+      Connection voyager, OkapiClient okapi, Integer bibId, String instanceUuid) throws SQLException, IOException {
     List<Holding> holdings = new ArrayList<>();
     if (holdingsForBibPstmt == null)
       holdingsForBibPstmt = voyager.prepareStatement(

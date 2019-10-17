@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+
 import java.util.Objects;
 import java.util.TreeSet;
 
@@ -45,10 +46,6 @@ public class MarcRecord {
 
   public MarcRecord( byte[] rawMarc ) {
     this.leader = new String( Arrays.copyOfRange(rawMarc,0,24), StandardCharsets.UTF_8 );
-//    int recordLength = Integer.valueOf(this.leader.substring(0, 5));
-//    if (recordLength != rawMarc.length)
-//      throw new IllegalArgumentException(String.format(
-//          "%s\nMarc leader's stated record length %d doesn't match actual length %d.",this.leader,recordLength,rawMarc.length));
     int dataBaseAddress = Integer.valueOf(new String( Arrays.copyOfRange(rawMarc,12,17) ));
     byte[] directory = Arrays.copyOfRange(rawMarc, 24, dataBaseAddress);
     byte[] data = Arrays.copyOfRange(rawMarc, dataBaseAddress,rawMarc.length+1);
@@ -64,8 +61,6 @@ public class MarcRecord {
         this.controlFields.add( new ControlField( fieldId++, tag, new String(
             Arrays.copyOfRange(fieldValue,0,fieldValue.length-1),StandardCharsets.UTF_8)));
       else {
-//        for (byte b : fieldValue)
-//          System.out.printf("%c %d %x\n",(char)b, b, b);
         char ind1 = (char)fieldValue[0];
         char ind2 = (char)fieldValue[1];
         TreeSet<Subfield> subfields = new TreeSet<>();
@@ -103,6 +98,9 @@ public class MarcRecord {
     return sb.toString();
   }
 
+  public static enum RecordType {
+    BIBLIOGRAPHIC, HOLDINGS, AUTHORITY
+  }
 
   public static class ControlField implements Comparable<ControlField> {
 
@@ -170,6 +168,29 @@ public class MarcRecord {
           sb.append(sf.value.trim());
       }
       return sb.toString();
+    }
+    public String concatSubfields(final String wantedSubfields) {
+      final StringBuilder sb = new StringBuilder();
+      Boolean first = true;
+      Boolean rtl = false;
+      for(final Subfield sf : this.subfields) {
+          if (sf.code.equals('6'))
+              if (sf.value.endsWith("/r"))
+                  rtl = true;
+          if (! wantedSubfields.contains(sf.code.toString()))
+              continue;
+
+          if (first) first = false;
+          else sb.append(' ');
+          sb.append(sf.value.trim());
+      }
+
+      final String val = sb.toString().trim();
+      if (rtl && (val.length() > 0)) {
+          return RLE_openRTL+val+PDF_closeRTL;
+      }
+      return val;
+      
     }
 
     @Override public int compareTo(final DataField other) { return Integer.compare(this.id, other.id); }
