@@ -25,12 +25,13 @@ public class CompareSRSJsonWithRawMarcAndOriginalMarc {
     OkapiClient okapi = new OkapiClient(prop.getProperty("url32dmg"),prop.getProperty("token32dmg"));
     String srsEndPoint = "/source-storage/records";
 
-    List<Map<String,Object>> records = okapi.queryAsList(srsEndPoint,"id==* sortBy id",20);
+    List<Map<String,Object>> records = okapi.queryAsList(srsEndPoint,"deleted==false sortBy id",20);
     try ( Connection voyager = DriverManager.getConnection(
         prop.getProperty("voyagerDBUrl"), prop.getProperty("voyagerDBUser"), prop.getProperty("voyagerDBPass")) ) {
       while (records.size() > 0) {
         String idCursor = processRecords(records, voyager);
-        records = okapi.queryAsList(srsEndPoint,String.format("id > \"%s\" sortBy id",idCursor),20);
+        System.out.println(idCursor);
+        records = okapi.queryAsList(srsEndPoint,String.format("deleted==false and id > \"%s\" sortBy id",idCursor),20);
       }
     }
   }

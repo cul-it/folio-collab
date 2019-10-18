@@ -79,7 +79,7 @@ public class Holding {
   @SuppressWarnings("unchecked")
   private void processMarcData() {
     for (MarcRecord.DataField f : this.marc.dataFields)
-      switch (f.mainTag) {
+      switch (f.tag) {
       case "852":
         List<String> callNumberParts = new ArrayList<>();
         for (MarcRecord.Subfield sf : f.subfields)
@@ -153,8 +153,8 @@ public class Holding {
           System.out.println("Holdings description field lacks holdings description " + f.toString());
           break;
         }
-        String field = (f.mainTag.equals("866")) ? "holdingsStatements"
-            : (f.mainTag.equals("867")) ? "holdingsStatementsForIndexes" : "holdingsStatementsForSupplements";
+        String field = (f.tag.equals("866")) ? "holdingsStatements"
+            : (f.tag.equals("867")) ? "holdingsStatementsForIndexes" : "holdingsStatementsForSupplements";
         List<Map<String, String>> stmtlist;
 
         if (this.holding.containsKey(field))

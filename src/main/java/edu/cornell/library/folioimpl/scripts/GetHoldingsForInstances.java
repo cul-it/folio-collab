@@ -3,6 +3,7 @@ package edu.cornell.library.folioimpl.scripts;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.rmi.NoSuchObjectException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -15,8 +16,10 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.regex.Pattern;
 
+import edu.cornell.library.folioimpl.objects.Holding;
 import edu.cornell.library.folioimpl.objects.OkapiClient;
 import edu.cornell.library.folioimpl.objects.ReferenceData;
+import edu.cornell.library.folioimpl.tools.Holdings;
 
 public class GetHoldingsForInstances {
 
@@ -29,7 +32,7 @@ public class GetHoldingsForInstances {
 
     String instanceEndPoint = "/instance-storage/instances";
 
-    OkapiClient okapi = new OkapiClient(prop.getProperty("url32dmg"),prop.getProperty("token32dmg"));
+    OkapiClient okapi = new OkapiClient(prop.getProperty("url32sb"),prop.getProperty("token32sb"));
 
     ReferenceData identifierTypes = new ReferenceData(okapi, "/identifier-types", "name");
     String localId = identifierTypes.getUuid("Local Identifier");
@@ -57,7 +60,7 @@ public class GetHoldingsForInstances {
   @SuppressWarnings("unchecked")
   private static String processInstanceBatch( Connection voyager, OkapiClient okapi,
       List<Map<String,Object>> instances, String localId, String sysCtrlNum, List<String> skippedInstances)
-      throws NumberFormatException, SQLException {
+      throws NumberFormatException, SQLException, IOException {
 
     String lastHrid = null;
     for (Object instance : instances) {
@@ -97,16 +100,23 @@ public class GetHoldingsForInstances {
         }
       }
 
-/*      List<Holding> holdings = Holdings.getHoldingsForBibRecord(
+      List<Holding> holdings = Holdings.getHoldingsForBibRecord(
           voyager, okapi, Integer.valueOf(bibId), (String)i.get("id"));
 //      System.out.println("id=" + i.get("id") + "; bibid=" + bibId + "; holdingCount=" + holdings.size());
       for (Holding h : holdings) {
 //        System.out.println("\t" + h.toString());
 //        String response = okapi.delete("/holdings-storage/holdings", h.getId());
 //        System.out.println(response);
-//        String response = okapi.post("/holdings-storage/holdings", h.toString());
-//        System.out.println(response);
-      }*/
+        String response;
+        try {
+          okapi.getRecord("/holdings-storage/holdings", h.getId());
+          response = okapi.put("/holdings-storage/holdings", h.getId(), h.toString());
+        } catch ( NoSuchObjectException e ) {
+          response = okapi.post("/holdings-storage/holdings", h.toString());
+        }
+        if ( ! response.isEmpty() )
+        System.out.println(response);
+      }
 //      System.exit(0);
     }
     return lastHrid;

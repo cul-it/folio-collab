@@ -16,9 +16,10 @@ public class EmptySRSandInstanceStore {
       prop.load(in);
     }
 
-    OkapiClient okapi32dmg = new OkapiClient(prop.getProperty("url32dmg"),prop.getProperty("token32dmg"));
-    okapi32dmg.deleteAll("/source-storage/records", "deleted==false", true);
-    okapi32dmg.deleteAll("/instance-storage/instances", true);
+    OkapiClient okapi = new OkapiClient(prop.getProperty("url32sb"),prop.getProperty("token32sb"));
+//    okapi.deleteAll("/holdings-storage/holdings", true);
+    okapi.deleteAll("/source-storage/records", "deleted==false", true);
+    okapi.deleteAll("/instance-storage/instances", true);
   }
 
 }
