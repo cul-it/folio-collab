@@ -16,12 +16,10 @@ public class PopulateBaseReferenceDataFromOneInstanceToAnother {
       prop.load(in);
     }
 
-    OkapiClient okapi31dmg =   new OkapiClient( prop.getProperty("url31dmg"), prop.getProperty("token31dmg") );
-    OkapiClient okapi31sb = new OkapiClient( prop.getProperty("url31sb"),  prop.getProperty("token31sb")  );
     OkapiClient okapi32dmg =new OkapiClient( prop.getProperty("url32dmg"), prop.getProperty("token32dmg") );
     OkapiClient okapi32sb = new OkapiClient( prop.getProperty("url32sb"),  prop.getProperty("token32sb")  );
 
-    OkapiClient from = okapi31dmg;
+    OkapiClient from = okapi32dmg;
     OkapiClient to   = okapi32sb;
 
     to.deleteAll("/locations", true);
@@ -35,6 +33,7 @@ public class PopulateBaseReferenceDataFromOneInstanceToAnother {
     CopyDataSetFromOneFolioToAnother.copy(from, to, "/service-points");
     CopyDataSetFromOneFolioToAnother.copy(from, to, "/material-types");
     CopyDataSetFromOneFolioToAnother.copy(from, to, "/loan-types");
+    CopyDataSetFromOneFolioToAnother.copy(from, to, "/loan-policy-storage/loan-policies");
     CopyDataSetFromOneFolioToAnother.copy(from, to, "/groups");
     CopyDataSetFromOneFolioToAnother.copy(from, to, "/organizations-storage/contacts");
     CopyDataSetFromOneFolioToAnother.copy(from, to, "/organizations-storage/organizations");

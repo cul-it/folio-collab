@@ -24,8 +24,7 @@ public class Libraries {
     try (InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream(sourceFile)) {
       ObjectMapper mapper = new ObjectMapper();
       Set<Library> libraries = mapper.readValue(convertStreamToString(in).replaceAll("(?m)^#.*$", ""),
-          new TypeReference<LinkedHashSet<Library>>() {
-          });
+          new TypeReference<LinkedHashSet<Library>>() { });
     }
     return null;
   }
