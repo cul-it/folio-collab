@@ -131,7 +131,8 @@ public class CopyDataSetFromOneFolioToAnother {
 
     // Pull values from source system
     String sourceJson = sourceOkapi.query(endPoint, null, maxDataSetSize);
-    if ( maxDataSetSize < (Integer)mapper.readValue(sourceJson,Map.class).get("totalRecords") )
+    if ( ! sourceJson.startsWith("[") &&
+        maxDataSetSize < (Integer)mapper.readValue(sourceJson,Map.class).get("totalRecords") )
       throw new UnsupportedOperationException(
           "Method available for endpoints of no more than "+maxDataSetSize+" records.");
     List<Map<String,Object>> sourceData = OkapiClient.resultsToList(sourceJson);

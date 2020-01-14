@@ -23,11 +23,18 @@ public class OkapiClient {
 
   private final String url;
   private final String token;
+  private final String tenant;
 
   public OkapiClient( String okapiUrl, String accessToken ) {
     this.url = okapiUrl;
     this.token = accessToken;
+    this.tenant = "diku";
     //TODO add test of okapi availability
+  }
+  public OkapiClient( String okapiUrl, String accessToken, String tenant ) {
+    this.url = okapiUrl;
+    this.token = accessToken;
+    this.tenant = tenant;
   }
 
   public String post( String endPoint, String json ) throws IOException {
@@ -142,9 +149,13 @@ public class OkapiClient {
       sb.append(URLEncoder.encode(query,"UTF-8"));
     }
     if ( limit != null ) {
-      sb.append((query == null)?"?limit=":"&limit=");
+      String limitField = endPoint.startsWith("/perms")?"length":"limit";
+      sb.append((query == null)?'?':'&');
+      sb.append(limitField);
+      sb.append('=');
       sb.append(limit);
     }
+    System.out.println(sb.toString());
     HttpURLConnection c = commonConnectionSetup(sb.toString());
     int responseCode = c.getResponseCode();
     if (responseCode != 200)
@@ -155,22 +166,30 @@ public class OkapiClient {
     }
   }
 
+  @SuppressWarnings("unchecked")
   public static Map<String,Map<String,Object>> resultsToMap(String readValue)
       throws JsonParseException, JsonMappingException, IOException {
-    Map<String, Object> rawData = mapper.readValue(readValue, Map.class);
     Map<String,Map<String,Object>> dataMap = new HashMap<>();
-    for (String mainKey : rawData.keySet()) 
-      if ( ! mainKey.equals("totalRecords") && ! mainKey.equals("resultInfo") ) {
-        @SuppressWarnings("unchecked")
-        List<Map<String,Object>> records = (ArrayList<Map<String,Object>>)rawData.get(mainKey);
-        for ( Map<String,Object> record : records )
-          dataMap.put((String)record.get("id"), record);
-      }
+
+    List<Map<String,Object>> records = null;
+    if ( readValue.startsWith("[") ) {
+      records = mapper.readValue(readValue, ArrayList.class);
+    } else {
+      Map<String, Object> rawData = mapper.readValue(readValue, Map.class);
+      for (String mainKey : rawData.keySet()) 
+        if ( ! mainKey.equals("totalRecords") && ! mainKey.equals("resultInfo") ) {
+          records = (ArrayList<Map<String,Object>>)rawData.get(mainKey);
+        }
+    }
+    for ( Map<String,Object> record : records )
+      dataMap.put((String)record.get("id"), record);
     return dataMap;
   }
 
   public static List<Map<String,Object>> resultsToList(String readValue)
       throws JsonParseException, JsonMappingException, IOException {
+    if ( readValue.startsWith("[") )
+      return mapper.readValue(readValue, ArrayList.class);
     Map<String, Object> rawData = mapper.readValue(readValue, Map.class);
     for (String mainKey : rawData.keySet()) {
       if ( ! mainKey.equals("totalRecords") && ! mainKey.equals("resultInfo") ) {
@@ -187,9 +206,10 @@ public class OkapiClient {
 
   private HttpURLConnection commonConnectionSetup( String path ) throws IOException {
     URL fullPath = new URL( this.url + path );
+    System.out.println(fullPath.toString());
     HttpURLConnection c = (HttpURLConnection) fullPath.openConnection();
     c.setRequestProperty("Content-Type", "application/json;charset=utf-8");
-    c.setRequestProperty("X-Okapi-Tenant", "diku");
+    c.setRequestProperty("X-Okapi-Tenant", this.tenant);
     c.setRequestProperty("X-Okapi-Token", this.token);
     return c;
     
