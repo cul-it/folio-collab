@@ -21,11 +21,14 @@ public class PopulateBaseReferenceDataFromOneInstanceToAnother {
 
     OkapiClient okapi32ermdev =new OkapiClient( prop.getProperty("url32ermdev"), prop.getProperty("token32ermdev") );
     OkapiClient okapi32erm    =new OkapiClient( prop.getProperty("url32erm"), prop.getProperty("token32erm") );
-    OkapiClient okapi4erm    =new OkapiClient( prop.getProperty("url4ermdev"), prop.getProperty("token4ermdev"), prop.getProperty("tenant4ermdev") );
+    OkapiClient okapi4ermdev =new OkapiClient( prop.getProperty("url4ermdev"), prop.getProperty("token4ermdev"), prop.getProperty("tenant4ermdev") );
+    OkapiClient okapi4erm =new OkapiClient( prop.getProperty("url4erm"), prop.getProperty("token4erm"), prop.getProperty("tenant4erm") );
+    OkapiClient okapi4dmg =new OkapiClient( prop.getProperty("url4dmg"), prop.getProperty("token4dmg"), prop.getProperty("tenant4dmg") );
+    OkapiClient okapi4sb =new OkapiClient( prop.getProperty("url4sb"), prop.getProperty("token4sb"), prop.getProperty("tenant4sb") );
 
-    OkapiClient from = okapi32ermdev;
-    OkapiClient to   = okapi32erm;
-/*
+    OkapiClient from = okapi32dmg;
+    OkapiClient to   = okapi4sb;
+
     to.deleteAll("/locations", true);
     to.deleteAll("/location-units/libraries", true);
     to.deleteAll("/location-units/campuses", true);
@@ -42,8 +45,13 @@ public class PopulateBaseReferenceDataFromOneInstanceToAnother {
     CopyDataSetFromOneFolioToAnother.copy(from, to, "/organizations-storage/categories");
     CopyDataSetFromOneFolioToAnother.copy(from, to, "/organizations-storage/contacts");
     CopyDataSetFromOneFolioToAnother.copy(from, to, "/organizations-storage/organizations");
-*/
+
+
+//    CopyDataSetFromOneFolioToAnother.copy(from, to, "/perms/permissions");
 //    to.deleteAll("/licenses/licenseLinks", true); (copy when source is q4 or later)
+//    to.deleteAll("/licenses/licenses", true);
+//    for ( int i = 1 ; i < 38; i++)
+//    CopyDataSetFromOneFolioToAnother.copy(from, to, "/licenses/licenses", i);
 //    CopyDataSetFromOneFolioToAnother.copy(from, to, "/licenses/refdata");
 //    CopyDataSetFromOneFolioToAnother.copy(from, to, "/licenses/custprops");
   }

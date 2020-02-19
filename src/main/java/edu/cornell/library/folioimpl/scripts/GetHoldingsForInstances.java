@@ -2,20 +2,15 @@ package edu.cornell.library.folioimpl.scripts;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.rmi.NoSuchObjectException;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.regex.Pattern;
-
 import edu.cornell.library.folioimpl.objects.Holding;
 import edu.cornell.library.folioimpl.objects.OkapiClient;
 import edu.cornell.library.folioimpl.objects.ReferenceData;
@@ -32,7 +27,7 @@ public class GetHoldingsForInstances {
 
     String instanceEndPoint = "/instance-storage/instances";
 
-    OkapiClient okapi = new OkapiClient(prop.getProperty("url32sb"),prop.getProperty("token32sb"));
+    OkapiClient okapi = new OkapiClient( prop.getProperty("url4dmg"), prop.getProperty("token4dmg"), prop.getProperty("tenant4dmg") );
 
     ReferenceData identifierTypes = new ReferenceData(okapi, "/identifier-types", "name");
     String localId = identifierTypes.getUuid("Local Identifier");
@@ -72,8 +67,10 @@ public class GetHoldingsForInstances {
 
       List<Object> identifiers = (ArrayList<Object>) i.get("identifiers");
       String title = ((String) i.get("title"));
-      String bibId = null;
+      String bibId = ((String) i.get("hrid"));
+
       List<String> potentialBibIds = new ArrayList<>();
+/*
       for (Object identifier : identifiers) {
         Map<String, String> id = (HashMap<String, String>) identifier;
 
@@ -89,6 +86,7 @@ public class GetHoldingsForInstances {
             else
               potentialBibIds.add(id.get("value"));
       }
+*/
 
       if (bibId == null) {
         if ( potentialBibIds.size() == 1 )
@@ -121,7 +119,7 @@ public class GetHoldingsForInstances {
     }
     return lastHrid;
   }
-
+/*
   private static boolean isActuallyTheBibId(Connection voyager, String title, String candidateBibId)
       throws SQLException {
 
@@ -146,7 +144,7 @@ public class GetHoldingsForInstances {
   }
   static PreparedStatement bibTextQuery = null;
   static Pattern integerP = Pattern.compile("^\\d+$");
-
+*/
 
 
 }

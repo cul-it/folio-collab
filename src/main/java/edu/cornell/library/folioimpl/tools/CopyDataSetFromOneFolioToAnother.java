@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -30,6 +31,12 @@ public class CopyDataSetFromOneFolioToAnother {
   private Set<CreateRecord> satellites = null;
 
 
+  public static int arbitraryInt = 1;
+  public static void copy( OkapiClient okapi1, OkapiClient okapi2, String endPoint, int i )
+      throws IOException {
+    arbitraryInt = i;
+    doTheThing( okapi1, okapi2, endPoint, true, null, null, null, null, null );
+  }
   public static void copy( OkapiClient okapi1, OkapiClient okapi2, String endPoint )
       throws IOException {
     doTheThing( okapi1, okapi2, endPoint, true, null, null, null, null, null );
@@ -135,7 +142,8 @@ public class CopyDataSetFromOneFolioToAnother {
         maxDataSetSize < (Integer)mapper.readValue(sourceJson,Map.class).get("totalRecords") )
       throw new UnsupportedOperationException(
           "Method available for endpoints of no more than "+maxDataSetSize+" records.");
-    List<Map<String,Object>> sourceData = OkapiClient.resultsToList(sourceJson);
+    List<Map<String,Object>> sourceData = OkapiClient.resultsToList(sourceJson)
+        .stream().filter(p -> ! p.containsKey("name") || ! ((String)p.get("name")).contains("Test License")).collect(Collectors.toList());
 
     // Modify source records if appropriate
     if ( mod != null )

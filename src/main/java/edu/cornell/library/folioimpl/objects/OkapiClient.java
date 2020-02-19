@@ -10,6 +10,7 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.rmi.NoSuchObjectException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +19,8 @@ import java.util.stream.Collectors;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import edu.cornell.library.folioimpl.tools.CopyDataSetFromOneFolioToAnother;
 
 public class OkapiClient {
 
@@ -154,6 +157,8 @@ public class OkapiClient {
       sb.append(limitField);
       sb.append('=');
       sb.append(limit);
+      sb.append("&stats=true&filters=status.value%3Dactive&page=");
+      sb.append( CopyDataSetFromOneFolioToAnother.arbitraryInt );
     }
     System.out.println(sb.toString());
     HttpURLConnection c = commonConnectionSetup(sb.toString());
@@ -166,6 +171,8 @@ public class OkapiClient {
     }
   }
 
+  static final List<String> notRecordsKeys = Arrays.asList(
+      "totalRecords","resultInfo","pageSize","page","totalPages","meta","totalRecords","total");
   @SuppressWarnings("unchecked")
   public static Map<String,Map<String,Object>> resultsToMap(String readValue)
       throws JsonParseException, JsonMappingException, IOException {
@@ -176,13 +183,18 @@ public class OkapiClient {
       records = mapper.readValue(readValue, ArrayList.class);
     } else {
       Map<String, Object> rawData = mapper.readValue(readValue, Map.class);
+      System.out.println(String.join(", ",rawData.keySet()));
       for (String mainKey : rawData.keySet()) 
-        if ( ! mainKey.equals("totalRecords") && ! mainKey.equals("resultInfo") ) {
+        if ( ! notRecordsKeys.contains(mainKey) ) {
           records = (ArrayList<Map<String,Object>>)rawData.get(mainKey);
+          System.out.println(records);
         }
     }
-    for ( Map<String,Object> record : records )
+    for ( Map<String,Object> record : records ) {
+      System.out.println(record.get("name"));
+      if (record.containsKey("name") && ((String)record.get("name")).contains("Test License")) continue;
       dataMap.put((String)record.get("id"), record);
+    }
     return dataMap;
   }
 

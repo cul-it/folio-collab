@@ -25,22 +25,23 @@ public class CopyUsersFromOneInstanceToAnother {
       prop.load(in);
     }
 
-    OkapiClient okapi31sb = new OkapiClient( prop.getProperty("url31sb"),  prop.getProperty("token31sb")  );
     OkapiClient okapi32dmg =new OkapiClient( prop.getProperty("url32dmg"), prop.getProperty("token32dmg") );
     OkapiClient okapi32sb = new OkapiClient( prop.getProperty("url32sb"),  prop.getProperty("token32sb")  );
     OkapiClient okapi32ermdev = new OkapiClient( prop.getProperty("url32ermdev"), prop.getProperty("token32ermdev")  );
-    OkapiClient okapi32erm =    new OkapiClient( prop.getProperty("url32erm"),    prop.getProperty("token32erm")  );
-    OkapiClient okapi4erm    =new OkapiClient( prop.getProperty("url4ermdev"), prop.getProperty("token4ermdev"), prop.getProperty("tenant4ermdev") );
+    OkapiClient okapi4ermdev =new OkapiClient( prop.getProperty("url4ermdev"), prop.getProperty("token4ermdev"), prop.getProperty("tenant4ermdev") );
+    OkapiClient okapi4erm =new OkapiClient( prop.getProperty("url4erm"), prop.getProperty("token4erm"), prop.getProperty("tenant4erm") );
+    OkapiClient okapi4dmg =new OkapiClient( prop.getProperty("url4dmg"), prop.getProperty("token4dmg"), prop.getProperty("tenant4dmg") );
+    OkapiClient okapi4sb =new OkapiClient( prop.getProperty("url4sb"), prop.getProperty("token4sb"), prop.getProperty("tenant4sb") );
 
-    OkapiClient from = okapi32erm;
-    OkapiClient to = okapi4erm;
+    OkapiClient from = okapi32sb;
+    OkapiClient to = okapi4sb;
 
     ReferenceData patronGroups = new ReferenceData( to, "/groups", "group");
     ReferenceData permissions =  new ReferenceData( to, "/perms/permissions", "displayName");
 
     List<String> dmgUserList = Arrays.asList(prop.getProperty("migrationteam").split(","));
     List<String> sbUserList = Arrays.asList(prop.getProperty("allusers").split(","));
-
+/*
     {
     CopyDataSetFromOneFolioToAnother.Builder users = new CopyDataSetFromOneFolioToAnother.Builder();
     users.setSourceOkapi(from).setDestOkapi(to).setEndPoint("/users").setDeleteUnmatched(false);
@@ -62,13 +63,13 @@ public class CopyUsersFromOneInstanceToAnother {
           @Override public Map<String, Object> buildRecord(Map<String, Object> user) {
             Map<String, Object> r= new HashMap<>();
             r.put("userId", user.get("id"));
-            r.put("permissions", Arrays.asList("df8bc8c1-2d7c-4ba8-8327-8c5100facc22"));
+            r.put("permissions", Arrays.asList("660d8f5c-a269-468b-9df2-45f0490251e4"));
             return r;
           }});
     users.build().execute();
     }
     System.exit(0);
-
+*/
     {
     CopyDataSetFromOneFolioToAnother.Builder users = new CopyDataSetFromOneFolioToAnother.Builder();
     users.setSourceOkapi(from).setDestOkapi(to).setEndPoint("/users").setDeleteUnmatched(false);
