@@ -12,6 +12,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 public class Item2Json {
 
   // essentially the 'columns' names/aliases used in the main query
@@ -69,7 +72,7 @@ public class Item2Json {
     loanTypeHash.put("visual", "Circulating");
   }
 
-
+  private static ObjectMapper mapper = new ObjectMapper();
 
   final ReferenceData itemNoteTypes;
   final ReferenceData materialTypes;
@@ -123,22 +126,32 @@ public class Item2Json {
   }
 
   public class Item { //TODO
-    String id = null;
-    List<String> formerIds = new ArrayList<>();
-    String materialTypeId = null;
-    String holdingsRecordId = null;
-    String barcode = null;
-    String enumeration = null;
-    String chronology = null;
-    List<String> copyNumbers = new ArrayList<>();
-    String numberOfPieces = null;
-    Map<String,String> status = new HashMap<>();
-    String permanentLoanTypeId = null;
-    String temporaryLoanTypeId = null;
-    String permanentLocationId = null;
-    String temporaryLocationId = null;
-    List<Map<String,String>> notes = new ArrayList<>();
-    
+    public String id = null;
+    public List<String> formerIds = new ArrayList<>();
+    public String materialTypeId = null;
+    public String holdingsRecordId = null;
+    public String barcode = null;
+    public String enumeration = null;
+    public String chronology = null;
+    public List<String> copyNumbers = new ArrayList<>();
+    public String numberOfPieces = null;
+    public Map<String,String> status = new HashMap<>();
+    public String permanentLoanTypeId = null;
+    public String temporaryLoanTypeId = null;
+    public String permanentLocationId = null;
+    public String temporaryLocationId = null;
+    public List<Map<String,String>> notes = new ArrayList<>();
+    public String getId() { return id; }
+
+    @Override
+    public String toString() {
+      String s = null;
+      try {
+        s = mapper.writeValueAsString(this);
+      } catch (JsonProcessingException e) {}
+      return s;
+    }
+
   }
 
   /**

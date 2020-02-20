@@ -12,11 +12,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import edu.cornell.library.folioimpl.objects.Holding;
+import edu.cornell.library.folioimpl.objects.Item2Json;
+import edu.cornell.library.folioimpl.objects.Item2Json.Item;
 import edu.cornell.library.folioimpl.objects.OkapiClient;
 import edu.cornell.library.folioimpl.objects.ReferenceData;
 import edu.cornell.library.folioimpl.tools.Holdings;
 
 public class GetHoldingsForInstances {
+
+  static String instanceEndPoint = "/instance-storage/instances";
+  static String holdingEndPoint  = "/holdings-storage/holdings";
+  static String itemEndPoint     = "/item-storage/items";
+  static Item2Json itemLoader = null;
 
   public static void main(String[] args) throws IOException, SQLException, NumberFormatException {
 
@@ -24,8 +31,6 @@ public class GetHoldingsForInstances {
     try (InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("database.properties")) {
       prop.load(in);
     }
-
-    String instanceEndPoint = "/instance-storage/instances";
 
     OkapiClient okapi = new OkapiClient( prop.getProperty("url4dmg"), prop.getProperty("token4dmg"), prop.getProperty("tenant4dmg") );
 
@@ -36,6 +41,8 @@ public class GetHoldingsForInstances {
     List<String> skippedInstances = new ArrayList<>();
     try ( Connection voyager = DriverManager.getConnection(
         prop.getProperty("voyagerDBUrl"), prop.getProperty("voyagerDBUser"), prop.getProperty("voyagerDBPass")) ) {
+
+      itemLoader = new Item2Json(voyager, okapi);
 
       List<Map<String,Object>> instances = okapi.queryAsList(instanceEndPoint,"id==* sortBy hrid",null);
       String hridCursor = processInstanceBatch(voyager, okapi, instances, localId, sysCtrlNum, skippedInstances);
@@ -58,16 +65,16 @@ public class GetHoldingsForInstances {
       throws NumberFormatException, SQLException, IOException {
 
     String lastHrid = null;
-    for (Object instance : instances) {
-      Map<String, Object> i = (HashMap<String, Object>) instance;
+    for (Object instanceObject : instances) {
+      Map<String, Object> instance = (HashMap<String, Object>) instanceObject;
 //      System.out.println(i);
 //      Map<String, Object> metadata = (HashMap<String, Object>) i.get("metadata");
 //      lastModDate = (String) metadata.get("updatedDate");
-      lastHrid = (String) i.get("hrid");
+      lastHrid = (String) instance.get("hrid");
 
-      List<Object> identifiers = (ArrayList<Object>) i.get("identifiers");
-      String title = ((String) i.get("title"));
-      String bibId = ((String) i.get("hrid"));
+      List<Object> identifiers = (ArrayList<Object>) instance.get("identifiers");
+      String title = ((String) instance.get("title"));
+      String bibId = ((String) instance.get("hrid"));
 
       List<String> potentialBibIds = new ArrayList<>();
 /*
@@ -92,28 +99,39 @@ public class GetHoldingsForInstances {
         if ( potentialBibIds.size() == 1 )
           bibId = potentialBibIds.get(0);
         else {
-          System.out.printf("bib id not identified: id:%s; title:%s\n",i.get("id"),i.get("title"));
-          skippedInstances.add((String)i.get("id"));
+          System.out.printf("bib id not identified: id:%s; title:%s\n",instance.get("id"),instance.get("title"));
+          skippedInstances.add((String)instance.get("id"));
           continue;
         }
       }
 
       List<Holding> holdings = Holdings.getHoldingsForBibRecord(
-          voyager, okapi, Integer.valueOf(bibId), (String)i.get("id"));
+          voyager, okapi, Integer.valueOf(bibId), (String)instance.get("id"));
 //      System.out.println("id=" + i.get("id") + "; bibid=" + bibId + "; holdingCount=" + holdings.size());
       for (Holding h : holdings) {
 //        System.out.println("\t" + h.toString());
-//        String response = okapi.delete("/holdings-storage/holdings", h.getId());
+//        String response = okapi.delete(holdingsEndPoint, h.getId());
 //        System.out.println(response);
         String response;
         try {
-          okapi.getRecord("/holdings-storage/holdings", h.getId());
-          response = okapi.put("/holdings-storage/holdings", h.getId(), h.toString());
+          okapi.getRecord(holdingEndPoint, h.getId());
+          System.out.println(h.toString());
+   //       response = okapi.put(holdingEndPoint, h.getId(), h.toString());
         } catch ( NoSuchObjectException e ) {
-          response = okapi.post("/holdings-storage/holdings", h.toString());
+          response = okapi.post(holdingEndPoint, h.toString());
         }
-        if ( ! response.isEmpty() )
-        System.out.println(response);
+        List<Item> items = itemLoader.getItemsForMfhdId(
+            Integer.valueOf(((List<String>)h.holding.get("formerIds")).get(0)),voyager);
+        for ( Item item : items ) {
+          try {
+            okapi.getRecord(itemEndPoint, item.getId());
+            response = okapi.put(itemEndPoint, item.getId(), item.toString());
+          } catch ( NoSuchObjectException e ) {
+            response = okapi.post(itemEndPoint, item.toString());
+          }
+        }
+//        if ( ! response.isEmpty() )
+ //       System.out.println(response);
       }
 //      System.exit(0);
     }

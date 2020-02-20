@@ -17,7 +17,7 @@ import edu.cornell.library.folioimpl.tools.DownloadMarc;
 public class Holding {
 
   public MarcRecord marc;
-  Map<String, Object> holding = new HashMap<>();
+  public Map<String, Object> holding = new HashMap<>();
   public String locationCode = null;
   private static ObjectMapper mapper = new ObjectMapper();
   private static ReferenceData holdingNoteTypes = null;
