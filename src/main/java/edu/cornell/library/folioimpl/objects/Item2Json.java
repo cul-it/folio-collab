@@ -104,7 +104,7 @@ public class Item2Json {
     AB  ("At Bindery",            null),
     CATR("Cataloging Review",     null),
     CRCR("Circulation Review",    null),
-    S   ("Scheduled",             FolioStatus.AVAIL),
+    S   ("Scheduled",             null),
     IP  ("In Process",            FolioStatus.PROCESS),
     CSR ("Call Slip Request",     FolioStatus.PAGED),
     SLR ("Short Loan Request",    FolioStatus.PAGED),
