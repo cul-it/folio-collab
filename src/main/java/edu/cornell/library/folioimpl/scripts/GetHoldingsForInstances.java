@@ -33,6 +33,7 @@ public class GetHoldingsForInstances {
     }
 
     OkapiClient okapi = new OkapiClient( prop.getProperty("url4dmg"), prop.getProperty("token4dmg"), prop.getProperty("tenant4dmg") );
+//    OkapiClient okapi = new OkapiClient( prop.getProperty("url4sb"), prop.getProperty("token4sb"), prop.getProperty("tenant4sb") );
 
     ReferenceData identifierTypes = new ReferenceData(okapi, "/identifier-types", "name");
     String localId = identifierTypes.getUuid("Local Identifier");
@@ -116,7 +117,7 @@ public class GetHoldingsForInstances {
         try {
           okapi.getRecord(holdingEndPoint, h.getId());
           System.out.println(h.toString());
-   //       response = okapi.put(holdingEndPoint, h.getId(), h.toString());
+          response = okapi.put(holdingEndPoint, h.getId(), h.toString());
         } catch ( NoSuchObjectException e ) {
           response = okapi.post(holdingEndPoint, h.toString());
         }

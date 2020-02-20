@@ -72,7 +72,56 @@ public class Item2Json {
     loanTypeHash.put("visual", "Circulating");
   }
 
-  private static ObjectMapper mapper = new ObjectMapper();
+  public enum FolioStatus {
+    AVAIL("Available"),      PICKUP("Awaiting pickup"),   CHECKEDOUT("Checked out"),
+    PROCESS("In process"),   TRANSIT("In transit"),       MISSING("Missing"),
+    ORDER("On order"),       PAGED("Paged"),              WITHDRAWN("Withdrawn"),
+    LOST("Declared lost"),   CLAIMED("Claimed returned");
+    final private String value;
+    private FolioStatus(String value) { this.value = value; }
+    @Override public String toString() { return this.value; }
+  }
+
+  public enum VoyagerStatus {
+    NIL ("not used do not remove 0-th entry",null),
+    NC  ("Not Charged",           FolioStatus.AVAIL),
+    C   ("Charged",               FolioStatus.CHECKEDOUT),
+    R   ("Renewed",               FolioStatus.CHECKEDOUT),
+    O   ("Overdue",               FolioStatus.CHECKEDOUT),
+    RR  ("Recall Request",        FolioStatus.CHECKEDOUT),
+    HR  ("Hold Request",          null),
+    OH  ("On Hold",               FolioStatus.PICKUP),
+    IT  ("In Transit",            FolioStatus.TRANSIT),
+    ITD ("In Transit Discharged", FolioStatus.TRANSIT),
+    ITOH("In Transit On Hold",    FolioStatus.TRANSIT),
+    DC  ("Discharged",            FolioStatus.AVAIL),
+    M   ("Missing",               FolioStatus.MISSING),
+    LLA ("Lost--Library Applied", FolioStatus.LOST),
+    LSA ("Lost--System Applied",  FolioStatus.LOST),
+    CRET("Claims Returned",       FolioStatus.CLAIMED),
+    D   ("Damaged",               null),
+    W   ("Withdrawn",             FolioStatus.WITHDRAWN),
+    AB  ("At Bindery",            null),
+    CATR("Cataloging Review",     null),
+    CRCR("Circulation Review",    null),
+    S   ("Scheduled",             FolioStatus.AVAIL),
+    IP  ("In Process",            FolioStatus.PROCESS),
+    CSR ("Call Slip Request",     FolioStatus.PAGED),
+    SLR ("Short Loan Request",    FolioStatus.PAGED),
+    RSR ("Remote Storage Request",FolioStatus.PAGED);
+    final private String value;
+    final private FolioStatus folioStatus;
+    private VoyagerStatus(String value, FolioStatus folioStatus) {
+      this.value = value; this.folioStatus = folioStatus;
+    }
+    @Override public String toString() {
+      if (this.folioStatus != null) return this.folioStatus.toString();
+      return this.value;
+    }
+  }
+  VoyagerStatus[] voyagerStatuses = VoyagerStatus.values();
+
+  static ObjectMapper mapper = new ObjectMapper();
 
   final ReferenceData itemNoteTypes;
   final ReferenceData materialTypes;
@@ -125,8 +174,9 @@ public class Item2Json {
     return processResultSet(res, columns, voyager );
   }
 
-  public class Item { //TODO
+  public class Item {
     public String id = null;
+    public String hrid = null;
     public List<String> formerIds = new ArrayList<>();
     public String materialTypeId = null;
     public String holdingsRecordId = null;
@@ -141,7 +191,7 @@ public class Item2Json {
     public String permanentLocationId = null;
     public String temporaryLocationId = null;
     public List<Map<String,String>> notes = new ArrayList<>();
-    public String getId() { return id; }
+    public String getId() { return this.id; }
 
     @Override
     public String toString() {
@@ -235,7 +285,8 @@ public class Item2Json {
 
         if (m == 0) {
           i.id = getItemUuid(con, colval);
-          i.formerIds.add(colval);
+//          i.formerIds.add(colval);
+          i.hrid = colval;
 
           // do material type here as well
           i.materialTypeId = this.materialTypes.getUuid(getMaterialTypeId(con, colval));
@@ -257,7 +308,7 @@ public class Item2Json {
           i.numberOfPieces = colval;
         } else if (m == 7) {
           String[] parts = colval.split("\\|");
-          i.status.put("name", statusStrings.get(Integer.parseInt(parts[1])));
+          i.status.put("name", this.voyagerStatuses[Integer.parseInt(parts[1])].toString() );
           if (!"<null>".equals(parts[2]))
             i.status.put("date", parts[2]);
         } else if (m == 8) {
@@ -308,14 +359,6 @@ public class Item2Json {
 
     return items;
   }
-
-
-  private static List<String> statusStrings = Arrays.asList("not used do not remove 0-th entry", "Not Charged",
-      "Charged", "Renewed", "Overdue", "Recall Request", "Hold Request", "On Hold", "In Transit",
-      "In Transit Discharged", "In Transit On Hold", "Discharged", "Missing", "Lost--Library Applied",
-      "Lost--System Applied", "Claims Returned", "Damaged", "Withdrawn", "At Bindery", "Cataloging Review",
-      "Circulation Review", "Scheduled", "In Process", "Call Slip Request", "Short Loan Request",
-      "Remote Storage Request");
 
   //get and make hash from item_type tbl
   /**

@@ -53,7 +53,8 @@ public class Holding {
   }
 
   public Holding setVoyagerMfhdId(Integer mfhdId) {
-    this.holding.put("formerIds", Arrays.asList(mfhdId.toString()));
+//    this.holding.put("formerIds", Arrays.asList(mfhdId.toString()));
+    this.holding.put("hrid", mfhdId.toString());
     return this;
   }
 
