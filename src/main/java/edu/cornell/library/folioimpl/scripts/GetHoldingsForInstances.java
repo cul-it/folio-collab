@@ -32,8 +32,8 @@ public class GetHoldingsForInstances {
       prop.load(in);
     }
 
-    OkapiClient okapi = new OkapiClient( prop.getProperty("url4dmg"), prop.getProperty("token4dmg"), prop.getProperty("tenant4dmg") );
-//    OkapiClient okapi = new OkapiClient( prop.getProperty("url4sb"), prop.getProperty("token4sb"), prop.getProperty("tenant4sb") );
+//    OkapiClient okapi = new OkapiClient( prop.getProperty("url4dmg"), prop.getProperty("token4dmg"), prop.getProperty("tenant4dmg") );
+    OkapiClient okapi = new OkapiClient( prop.getProperty("url4sb"), prop.getProperty("token4sb"), prop.getProperty("tenant4sb") );
 
     ReferenceData identifierTypes = new ReferenceData(okapi, "/identifier-types", "name");
     String localId = identifierTypes.getUuid("Local Identifier");
@@ -122,7 +122,7 @@ public class GetHoldingsForInstances {
           response = okapi.post(holdingEndPoint, h.toString());
         }
         List<Item> items = itemLoader.getItemsForMfhdId(
-            Integer.valueOf(((List<String>)h.holding.get("formerIds")).get(0)),voyager);
+            Integer.valueOf((String)h.holding.get("hrid")),voyager);
         for ( Item item : items ) {
           try {
             okapi.getRecord(itemEndPoint, item.getId());
