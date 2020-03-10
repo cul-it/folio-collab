@@ -18,8 +18,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class Item2Json {
 
   // essentially the 'columns' names/aliases used in the main query
-  static String[] selectTerms = { "item_id", "mfhd_uuid", "item_barcode", "item_enum", "chron", "copy_number", "pieces",
-      "comp_status", "item_type_id", "temp_item_type_id", "perm_location", "temp_location", "item_note" };
+  static String[] selectTerms = { "item_id","uuid","mt","mfhd_uuid","item_barcode","item_enum","chron","copy_number",
+      "pieces","comp_status","item_type_id","temp_item_type_id","perm_location","temp_location","item_note" };
 
   static public String selectClause = String.join(", ", selectTerms);
 
@@ -143,7 +143,8 @@ public class Item2Json {
     query = "select distinct ";
     // TBD
     // v----- need this pl/sql function
-    query += "   item.item_id, jrm424.mfhd_uuid(mfhd_item.mfhd_id) mfhd_uuid, ";
+    query += "   item.item_id, jrm424.item_id_uuid(item.item_id) uuid, ";
+    query += "   jrm424.matype(item.item_id) mt, jrm424.mfhd_uuid(mfhd_item.mfhd_id) mfhd_uuid, ";
     // query += " item.item_id, mfhd_item.mfhd_id, ";
     // query += " item_barcode.item_barcode, mfhd_item.item_enum, ";
     query += "   jrm424.bar_code(item.item_id) item_barcode, mfhd_item.item_enum, ";
@@ -171,7 +172,7 @@ public class Item2Json {
     if ( numberOfItems == 0 )
       return new ArrayList<>();
 
-    return processResultSet(res, columns, voyager );
+    return processResultSet(res, columns );
   }
 
   public class Item {
@@ -254,8 +255,7 @@ public class Item2Json {
    * @param res
    * @param columns
    */
-  public List<Item> processResultSet(ArrayList<String> res, ArrayList<String> columns, Connection con )
-      throws SQLException {
+  public List<Item> processResultSet(ArrayList<String> res, ArrayList<String> columns ) {
     List<Item> items = new ArrayList<>();
     int N = res.size() / columns.size(); // number of rows
 
@@ -284,54 +284,55 @@ public class Item2Json {
         result += colval;
 
         if (m == 0) {
-          i.id = getItemUuid(con, colval);
 //          i.formerIds.add(colval);
           i.hrid = colval;
 
-          // do material type here as well
-          i.materialTypeId = this.materialTypes.getUuid(getMaterialTypeId(con, colval));
         } else if (m == 1) {
-          i.holdingsRecordId = colval;
+          i.id = colval;
         } else if (m == 2) {
+          i.materialTypeId = this.materialTypes.getUuid(colval);
+        } else if (m == 3) {
+          i.holdingsRecordId = colval;
+        } else if (m == 4) {
           i.barcode = colval;
           if (colval == null) {
             barCodeFlag = true;
             // System.exit(1);
           }
-        } else if (m == 3) {
-          i.enumeration = colval;
-        } else if (m == 4) {
-          i.chronology = colval;
         } else if (m == 5) {
-          i.copyNumbers.add(colval);
+          i.enumeration = colval;
         } else if (m == 6) {
-          i.numberOfPieces = colval;
+          i.chronology = colval;
         } else if (m == 7) {
+          i.copyNumbers.add(colval);
+        } else if (m == 8) {
+          i.numberOfPieces = colval;
+        } else if (m == 9) {
           String[] parts = colval.split("\\|");
           i.status.put("name", this.voyagerStatuses[Integer.parseInt(parts[1])].toString() );
           if (!"<null>".equals(parts[2]))
             i.status.put("date", parts[2]);
-        } else if (m == 8) {
+        } else if (m == 10) {
           String v = this.itemTypeHash.get(colval);
           if (v != null)
             i.permanentLoanTypeId = this.loanTypes.getUuid(loanTypeHash.get(v));
-        } else if (m == 9) {
+        } else if (m == 11) {
           String v = this.itemTypeHash.get(colval);
           if (v != null)
             i.temporaryLoanTypeId = this.loanTypes.getUuid(loanTypeHash.get(v));
-        } else if (m == 10) {
+        } else if (m == 12) {
           String v = this.locations.getUuid(colval);
           if (v == null)
             v = this.locations.getUuid("void");
           i.permanentLocationId = v;
-        } else if (m == 11) {
+        } else if (m == 13) {
           if (colval != null) {
             String v = this.locations.getUuid(colval);
             if (v == null)
               v = this.locations.getUuid("void");
             i.temporaryLocationId = v;
           }
-        } else if (m == 12) {
+        } else if (m == 14) {
           if (colval != null) {
             Map<String, String> note = new HashMap<>();
             // "8d0a5eca-25de-4391-81a9-236eeefdd20b"
@@ -377,43 +378,6 @@ public class Item2Json {
           res.put(id, idn);
         }
       }
-    }
-    return res;
-  }
-
-  /**
-   * 
-   * @param con
-   * @param iid
-   * @return materialTypeId
-   * @throws SQLException
-   */
-  public static String getMaterialTypeId(Connection con, String iid) throws SQLException {
-    String materialTypeId = "";
-    String q = "select jrm424.matype(" + iid + ") mt from dual";
-
-    try ( Statement stmt = con.createStatement();
-          ResultSet rs = stmt.executeQuery(q) ) {
-      while ( rs.next() )  materialTypeId = rs.getString("mt");
-    }
-
-    return materialTypeId;
-  }
-
-  public static String getItemUuid(Connection con, String iid) throws SQLException {
-    String res = "";
-    String q = "select jrm424.item_id_uuid(" + iid + ") uuid from dual";
-
-    try ( Statement stmt = con.createStatement();
-          ResultSet rs = stmt.executeQuery(q) ) {
-      rs.next();
-      res = rs.getString("uuid");
-    }
-    if (res.startsWith("dup_")) {
-      // verrry rare ...
-      // 1 billion calls/second for a year yields 50% chance of dup
-      System.err.println("DUPLICATE UUID in getItemUuid " + iid + " -> " + res);
-      System.exit(1);
     }
     return res;
   }
