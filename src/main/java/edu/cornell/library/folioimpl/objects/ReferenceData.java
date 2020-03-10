@@ -34,8 +34,9 @@ public class ReferenceData {
    * return default or null.
    */
   public String getUuid(String keyValue) {
-    if (this.defaultKey == null || this.dataMap.containsKey(keyValue))
-      return this.dataMap.get(keyValue);
+    String value = keyValue.toLowerCase();
+    if (this.defaultKey == null || this.dataMap.containsKey(value))
+      return this.dataMap.get(value);
     return this.dataMap.get(this.defaultKey);
   }
 
@@ -44,7 +45,7 @@ public class ReferenceData {
    * null.
    */
   public String getStrictUuid(String keyValue) {
-    return this.dataMap.get(keyValue);
+    return this.dataMap.get(keyValue.toLowerCase());
   }
 
   /*
@@ -52,9 +53,10 @@ public class ReferenceData {
    * IllegalArgumentException if invalid.
    */
   public void setDefault(String defaultKey) throws IllegalArgumentException {
-    if (defaultKey != null && !this.dataMap.containsKey(defaultKey))
-      throw new IllegalArgumentException("Default key \"" + defaultKey + "\" is not a valid key.");
-    this.defaultKey = defaultKey;
+    String value = defaultKey.toLowerCase();
+    if (value != null && !this.dataMap.containsKey(value))
+      throw new IllegalArgumentException("Default key \"" + value + "\" is not a valid key.");
+    this.defaultKey = value;
   }
 
   public void writeMapToStdout() {
@@ -83,7 +85,7 @@ public class ReferenceData {
       @SuppressWarnings("unchecked")
       List<Map<String, Object>> entries = (ArrayList<Map<String, Object>>) mainValue;
       for (Map<String, Object> entry : entries)
-        processedMap.put((String) entry.get(keyField), (String) entry.get("id"));
+        processedMap.put( ((String) entry.get(keyField)).toLowerCase(), (String) entry.get("id"));
     }
     return processedMap;
   }
