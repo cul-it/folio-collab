@@ -73,8 +73,8 @@ public class GetHoldingsForInstances {
 
       List<Holding> holdings = Holdings.getHoldingsForBibRecord(
           voyager, okapi, Integer.valueOf(bibId), (String)instance.get("id"));
-      boolean holdingAlreadyInFolio = false;
       for (Holding h : holdings) {
+        boolean holdingAlreadyInFolio = false;
         try {
           okapi.getRecord(holdingEndPoint, h.getId());
           okapi.put(holdingEndPoint, h.getId(), h.toString());
