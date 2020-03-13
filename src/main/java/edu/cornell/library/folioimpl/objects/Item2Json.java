@@ -3,11 +3,9 @@ package edu.cornell.library.folioimpl.objects;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,15 +15,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class Item2Json {
 
-  // essentially the 'columns' names/aliases used in the main query
-  static String[] selectTerms = { "item_id","uuid","mt","mfhd_uuid","item_barcode","item_enum","chron","copy_number",
-      "pieces","comp_status","item_type_id","temp_item_type_id","perm_location","temp_location","item_note" };
-
-  static public String selectClause = String.join(", ", selectTerms);
-
-  // initialized by SQL query in getItemTypes() call
-  // item_type_id -> item_type_name
-  public Map<String, String> itemTypeHash;
+  public Map<Integer, String> itemTypeHash;
 
   // initialized by 'hand-coding' from design documents
   // preliminary to uuid lookup
@@ -164,15 +154,77 @@ public class Item2Json {
     query += " item.item_id = item_barcode.item_id  (+) and ";
     query += " mfhd_item.mfhd_id = " + mfhd + " order by item.item_id ";
 
-    ArrayList<String> res = readItemRecords(voyager, query);
+    try ( Statement stmt = voyager.createStatement();
+        ResultSet result = stmt.executeQuery(query)) {
+      return processResultSet(result );
+      
+    }
+  }
 
-    ArrayList<String> columns = new ArrayList<>();
-    columns = new ArrayList<>(Arrays.asList(selectClause.split(", ")));
-    int numberOfItems = res.size() / columns.size();
-    if ( numberOfItems == 0 )
-      return new ArrayList<>();
+  public List<Item> processResultSet(ResultSet results ) throws SQLException {
+    List<Item> items = new ArrayList<>();
 
-    return processResultSet(res, columns );
+    while (results.next()) {
+
+      Item i = new Item();
+      boolean barCodeFlag = false;
+
+      i.hrid = String.valueOf(results.getInt("item_id"));
+      i.id = results.getString("uuid");
+      i.materialTypeId = this.materialTypes.getUuid(results.getString("mt"));
+      i.holdingsRecordId = results.getString("mfhd_uuid");
+      i.barcode = results.getString("item_barcode");
+      if (i.barcode == null) barCodeFlag = true;
+      i.enumeration = results.getString("item_enum");
+      i.chronology = results.getString("chron");
+      i.copyNumbers.add(results.getString("copy_number"));
+      i.numberOfPieces = results.getInt("pieces");
+
+      String[] statusParts = results.getString("comp_status").split("\\|");
+      i.status.put("name", this.voyagerStatuses[Integer.parseInt(statusParts[1])].toString() );
+      if (!"<null>".equals(statusParts[2]))
+        i.status.put("date", statusParts[2]);
+
+      String permType = this.itemTypeHash.get(results.getInt("item_type_id"));
+      if (permType != null)
+        i.permanentLoanTypeId = this.loanTypes.getUuid(loanTypeHash.get(permType));
+
+      String tempType = this.itemTypeHash.get(results.getInt("temp_item_type_id"));
+      if (tempType != null)
+        i.temporaryLoanTypeId = this.loanTypes.getUuid(loanTypeHash.get(tempType));
+
+      String permLoc = this.locations.getUuid(results.getString("perm_location"));
+      if (permLoc == null)
+        permLoc = this.locations.getUuid("void");
+      i.permanentLocationId = permLoc;
+
+      String tempLocCode = results.getString("temp_location");
+      if (tempLocCode != null) {
+        String tempLoc = this.locations.getUuid(tempLocCode);
+        if (tempLoc == null)
+          tempLoc = this.locations.getUuid("void");
+        i.temporaryLocationId = tempLoc;
+      }
+
+      String note = results.getString("item_note");
+      if (note != null) {
+        Map<String, String> noteMap = new HashMap<>();
+        // "8d0a5eca-25de-4391-81a9-236eeefdd20b"
+        noteMap.put("itemNoteTypeId", this.itemNoteTypes.getUuid("Note"));
+        noteMap.put("note", note);
+        noteMap.put("staffOnly", "false");
+        i.notes.add(noteMap);
+      }
+
+      if (barCodeFlag) {
+        System.out.println("Empty item - no barcode status 1 " + i.hrid);
+
+      }
+      System.out.println(i.toString());
+      items.add(i);
+    }
+
+    return items;
   }
 
   public class Item {
@@ -185,7 +237,7 @@ public class Item2Json {
     public String enumeration = null;
     public String chronology = null;
     public List<String> copyNumbers = new ArrayList<>();
-    public String numberOfPieces = null;
+    public Integer numberOfPieces = null;
     public Map<String,String> status = new HashMap<>();
     public String permanentLoanTypeId = null;
     public String temporaryLoanTypeId = null;
@@ -205,175 +257,19 @@ public class Item2Json {
 
   }
 
-  /**
-   * @param query
-   * 
-   * @return result set as 1 dimensional ArrayList<String> will address it as a 2D
-   *         array
-   */
-  public static ArrayList<String> readItemRecords(Connection con, String query)
-      throws SQLException {
-
-    ArrayList<String> res = new ArrayList<>();
-    // collect column names
-    ArrayList<String> columns = new ArrayList<>();
-    columns = new ArrayList<>(Arrays.asList(selectClause.split(", ")));
-
-    try ( Statement stmt = con.createStatement();
-        ResultSet rs = stmt.executeQuery(query) ) {
-
-      ResultSetMetaData rsmd = rs.getMetaData();
-      System.out.println(rsmd.getColumnCount());
-
-      String cval = ""; // result for column
-      while (rs.next()) {
-        for (int n = 0; n < columns.size(); n++) {
-          String c = columns.get(n);
-
-          // accumulate row's columns
-          // google how-to-write-a-utf-8-file-with-java
-          // >>>---> part of UTF-8 fix <---<<<
-          /*
-           * if(n < 13) { cval = rs.getString(columns.get(n)); } else { byte[] b =
-           * rs.getBytes(n); if(b == null) { cval = null; } else { cval = new
-           * String(b,StandardCharsets.UTF_8); } }
-           */
-          cval = rs.getString(c);
-          res.add(cval);
-        }
-      }
-      // prevents java.sql.SQLException: ORA-01000: maximum open cursors exceeded
-      rs.close();
-
-      // con.close();
-      return res;
-    }
-  }
-
-  /**
-   * 
-   * @param res
-   * @param columns
-   */
-  public List<Item> processResultSet(ArrayList<String> res, ArrayList<String> columns ) {
-    List<Item> items = new ArrayList<>();
-    int N = res.size() / columns.size(); // number of rows
-
-    // treat res as a 2 dimensional array
-    // N rows x Csize columns
-    int Csize = columns.size();
-
-    for (int n = 0; n < N; n++) {
-
-      Item i = new Item();
-
-      String item_id = res.get(n * Csize);
-
-      boolean barCodeFlag = false;
-      String result = "";
-      for (int m = 0; m < Csize; m++) {
-        // m is column number
-        if (!result.equals(""))
-          result += ",";
-
-        // k is where column value is in res array
-        int k = Csize * n + m;
-        String r = columns.get(m);
-        String colval = res.get(k);
-
-        result += colval;
-
-        if (m == 0) {
-//          i.formerIds.add(colval);
-          i.hrid = colval;
-
-        } else if (m == 1) {
-          i.id = colval;
-        } else if (m == 2) {
-          i.materialTypeId = this.materialTypes.getUuid(colval);
-        } else if (m == 3) {
-          i.holdingsRecordId = colval;
-        } else if (m == 4) {
-          i.barcode = colval;
-          if (colval == null) {
-            barCodeFlag = true;
-            // System.exit(1);
-          }
-        } else if (m == 5) {
-          i.enumeration = colval;
-        } else if (m == 6) {
-          i.chronology = colval;
-        } else if (m == 7) {
-          i.copyNumbers.add(colval);
-        } else if (m == 8) {
-          i.numberOfPieces = colval;
-        } else if (m == 9) {
-          String[] parts = colval.split("\\|");
-          i.status.put("name", this.voyagerStatuses[Integer.parseInt(parts[1])].toString() );
-          if (!"<null>".equals(parts[2]))
-            i.status.put("date", parts[2]);
-        } else if (m == 10) {
-          String v = this.itemTypeHash.get(colval);
-          if (v != null)
-            i.permanentLoanTypeId = this.loanTypes.getUuid(loanTypeHash.get(v));
-        } else if (m == 11) {
-          String v = this.itemTypeHash.get(colval);
-          if (v != null)
-            i.temporaryLoanTypeId = this.loanTypes.getUuid(loanTypeHash.get(v));
-        } else if (m == 12) {
-          String v = this.locations.getUuid(colval);
-          if (v == null)
-            v = this.locations.getUuid("void");
-          i.permanentLocationId = v;
-        } else if (m == 13) {
-          if (colval != null) {
-            String v = this.locations.getUuid(colval);
-            if (v == null)
-              v = this.locations.getUuid("void");
-            i.temporaryLocationId = v;
-          }
-        } else if (m == 14) {
-          if (colval != null) {
-            Map<String, String> note = new HashMap<>();
-            // "8d0a5eca-25de-4391-81a9-236eeefdd20b"
-            note.put("itemNoteTypeId", this.itemNoteTypes.getUuid("Note"));
-            note.put("note", colval);
-            note.put("staffOnly", "false");
-            i.notes.add(note);
-          }
-        } else {
-          // catch all
-          System.out.println("Item value not handled "+r.toLowerCase());
-          System.exit(1);
-        }
-
-      }
-      if (barCodeFlag) {
-        System.out.println("Empty item - no barcode status 1 " + item_id);
-
-      }
-      System.out.println(i.toString());
-      System.out.println("result = " + result);
-      System.out.flush();
-      items.add(i);
-    }
-
-    return items;
-  }
-
   //get and make hash from item_type tbl
   /**
    * 
    * @param con
    * @throws SQLException
    */
-  public Map<String, String> getItemTypes(Connection con) throws SQLException {
-    Map<String, String> res = new HashMap<>();
+  public Map<Integer, String> getItemTypes(Connection con) throws SQLException {
+    Map<Integer, String> res = new HashMap<>();
     try ( Statement stmt = con.createStatement() ) {
       String q = "SELECT ITEM_TYPE_ID, ITEM_TYPE_NAME FROM ITEM_TYPE ORDER BY ITEM_TYPE_ID";
       try ( ResultSet rs = stmt.executeQuery(q) ) {
         while (rs.next()) {
-          String id = rs.getString("ITEM_TYPE_ID");
+          Integer id = rs.getInt("ITEM_TYPE_ID");
           String idn = rs.getString("ITEM_TYPE_NAME");
           res.put(id, idn);
         }
