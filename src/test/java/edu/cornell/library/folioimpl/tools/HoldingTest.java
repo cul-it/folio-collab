@@ -34,7 +34,7 @@ public class HoldingTest {
   }
 
   @Test
-  public void getHoldings() throws SQLException, IOException, XMLStreamException {
+  public void getHoldings() throws SQLException, IOException {
     Holding h = new Holding(voyager, okapi, 2);
     System.out.println(h.marc.toString());
   }

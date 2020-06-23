@@ -5,11 +5,13 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -79,7 +81,7 @@ public class Item2Json {
     R   ("Renewed",               FolioStatus.CHECKEDOUT),
     O   ("Overdue",               FolioStatus.CHECKEDOUT),
     RR  ("Recall Request",        FolioStatus.CHECKEDOUT),
-    HR  ("Hold Request",          null),
+    HR  ("Hold Request",          FolioStatus.PAGED),
     OH  ("On Hold",               FolioStatus.PICKUP),
     IT  ("In Transit",            FolioStatus.TRANSIT),
     ITD ("In Transit Discharged", FolioStatus.TRANSIT),
@@ -89,12 +91,12 @@ public class Item2Json {
     LLA ("Lost--Library Applied", FolioStatus.LOST),
     LSA ("Lost--System Applied",  FolioStatus.LOST),
     CRET("Claims Returned",       FolioStatus.CLAIMED),
-    D   ("Damaged",               null),
+    D   ("Damaged",               FolioStatus.AVAIL),
     W   ("Withdrawn",             FolioStatus.WITHDRAWN),
-    AB  ("At Bindery",            null),
-    CATR("Cataloging Review",     null),
-    CRCR("Circulation Review",    null),
-    S   ("Scheduled",             null),
+    AB  ("At Bindery",            FolioStatus.CHECKEDOUT),
+    CATR("Cataloging Review",     FolioStatus.CHECKEDOUT),
+    CRCR("Circulation Review",    FolioStatus.CHECKEDOUT),
+    S   ("Scheduled",             FolioStatus.PAGED),
     IP  ("In Process",            FolioStatus.PROCESS),
     CSR ("Call Slip Request",     FolioStatus.PAGED),
     SLR ("Short Loan Request",    FolioStatus.PAGED),
@@ -112,17 +114,23 @@ public class Item2Json {
   VoyagerStatus[] voyagerStatuses = VoyagerStatus.values();
 
   static ObjectMapper mapper = new ObjectMapper();
+  static {
+    mapper.setSerializationInclusion(Include.NON_EMPTY);
+  }
+
 
   final ReferenceData itemNoteTypes;
   final ReferenceData materialTypes;
   final ReferenceData loanTypes;
   final ReferenceData locations;
+  final ReferenceData itemDamagedStatuses;
   public Item2Json ( Connection voyager, OkapiClient okapi ) throws IOException, SQLException {
 
     this.itemNoteTypes = new ReferenceData(okapi, "/item-note-types", "name");
     this.materialTypes = new ReferenceData(okapi, "/material-types", "name");
     this.loanTypes = new ReferenceData(okapi, "/loan-types", "name");
     this.locations = new ReferenceData(okapi, "/locations", "code");
+    this.itemDamagedStatuses = new ReferenceData(okapi, "/item-damaged-statuses","name");
     this.itemTypeHash = getItemTypes( voyager );
 
   }
@@ -131,32 +139,67 @@ public class Item2Json {
 
     String query = "";
     query = "select distinct ";
-    // TBD
-    // v----- need this pl/sql function
     query += "   item.item_id, jrm424.item_id_uuid(item.item_id) uuid, ";
     query += "   jrm424.matype(item.item_id) mt, jrm424.mfhd_uuid(mfhd_item.mfhd_id) mfhd_uuid, ";
-    // query += " item.item_id, mfhd_item.mfhd_id, ";
-    // query += " item_barcode.item_barcode, mfhd_item.item_enum, ";
     query += "   jrm424.bar_code(item.item_id) item_barcode, mfhd_item.item_enum, ";
     query += "   mfhd_item.chron, item.copy_number, ";
     query += "   item.pieces, jrm424.mrlo(item_status.item_id) comp_status, ";
     query += "   item.item_type_id, item.temp_item_type_id, ";
     query += "   jrm424.location_code(item.perm_location) perm_location, ";
     query += "   jrm424.location_code(item.temp_location) temp_location, ";
-    query += "   item_note.item_note ";
+    query += "   item_note.item_note, damaged_status.item_status_date damaged_date ";
     query += "from";
     query += "    item, mfhd_item, item_status,";
-    query += "    item_note, item_barcode ";
+    query += "    item_note, item_barcode, item_status damaged_status ";
     query += "where";
     query += " item.item_id = mfhd_item.item_id (+) and ";
     query += " item.item_id = item_status.item_id (+) and ";
     query += " item.item_id = item_note.item_id (+) and ";
     query += " item.item_id = item_barcode.item_id  (+) and ";
+    query += " item.item_id = damaged_status.item_id (+) and ";
+    query += " damaged_status.item_status (+) = 16 and ";
     query += " mfhd_item.mfhd_id = " + mfhd + " order by item.item_id ";
 
+    System.out.println(query);
     try ( Statement stmt = voyager.createStatement();
         ResultSet result = stmt.executeQuery(query)) {
       return processResultSet(result );
+      
+    }
+  }
+
+
+  public Item getItemById(Integer itemId, Connection voyager) throws SQLException {
+
+    String query = "";
+    query = "select distinct ";
+    query += "   item.item_id, jrm424.item_id_uuid(item.item_id) uuid, ";
+    query += "   jrm424.matype(item.item_id) mt, mfhd_item.mfhd_id, ";
+    query += "   jrm424.bar_code(item.item_id) item_barcode, mfhd_item.item_enum, ";
+    query += "   mfhd_item.chron, item.copy_number, ";
+    query += "   item.pieces, jrm424.mrlo(item_status.item_id) comp_status, ";
+    query += "   item.item_type_id, item.temp_item_type_id, ";
+    query += "   jrm424.location_code(item.perm_location) perm_location, ";
+    query += "   jrm424.location_code(item.temp_location) temp_location, ";
+    query += "   item_note.item_note, damaged_status.item_status_date damaged_date ";
+    query += "from";
+    query += "    item, mfhd_item, item_status,";
+    query += "    item_note, item_barcode, item_status damaged_status ";
+    query += "where";
+    query += " item.item_id = "+ itemId + " and ";
+    query += " item.item_id = mfhd_item.item_id (+) and ";
+    query += " item.item_id = item_status.item_id (+) and ";
+    query += " item.item_id = item_note.item_id (+) and ";
+    query += " item.item_id = item_barcode.item_id  (+) and ";
+    query += " item.item_id = damaged_status.item_id (+) and ";
+    query += " damaged_status.item_status (+) = 16";
+
+    try ( Statement stmt = voyager.createStatement();
+        ResultSet result = stmt.executeQuery(query)) {
+      List<Item> items = processResultSet(result );
+      if ( items.isEmpty() )
+        return null;
+      return items.get(0);
       
     }
   }
@@ -172,7 +215,12 @@ public class Item2Json {
       i.hrid = String.valueOf(results.getInt("item_id"));
       i.id = results.getString("uuid");
       i.materialTypeId = this.materialTypes.getUuid(results.getString("mt"));
-      i.holdingsRecordId = results.getString("mfhd_uuid");
+      try {
+        results.findColumn("mfhd_uuid");
+        i.holdingsRecordId = results.getString("mfhd_uuid");
+      } catch (SQLException e ) {
+        i.mfhdId = results.getString("mfhd_id");
+      }
       i.barcode = results.getString("item_barcode");
       if (i.barcode == null) barCodeFlag = true;
       i.enumeration = results.getString("item_enum");
@@ -184,6 +232,12 @@ public class Item2Json {
       i.status.put("name", this.voyagerStatuses[Integer.parseInt(statusParts[1])].toString() );
       if (!"<null>".equals(statusParts[2]))
         i.status.put("date", statusParts[2]);
+
+      Timestamp damagedDate = results.getTimestamp("damaged_date");
+      if ( damagedDate != null ) {
+        i.itemDamagedStatusId = this.itemDamagedStatuses.getUuid("Damaged");
+        i.itemDamagedStatusDate = damagedDate.toInstant().toString().substring(0, 19)+".000+0000";
+      }
 
       String permType = this.itemTypeHash.get(results.getInt("item_type_id"));
       if (permType != null)
@@ -220,7 +274,6 @@ public class Item2Json {
         System.out.println("Empty item - no barcode status 1 " + i.hrid);
 
       }
-      System.out.println(i.toString());
       items.add(i);
     }
 
@@ -232,6 +285,7 @@ public class Item2Json {
     public String hrid = null;
     public List<String> formerIds = new ArrayList<>();
     public String materialTypeId = null;
+    public String mfhdId = null;
     public String holdingsRecordId = null;
     public String barcode = null;
     public String enumeration = null;
@@ -243,6 +297,8 @@ public class Item2Json {
     public String temporaryLoanTypeId = null;
     public String permanentLocationId = null;
     public String temporaryLocationId = null;
+    public String itemDamagedStatusId = null;
+    public String itemDamagedStatusDate = null;
     public List<Map<String,String>> notes = new ArrayList<>();
     public String getId() { return this.id; }
 
