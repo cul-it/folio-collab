@@ -8,6 +8,8 @@ import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.time.Instant;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Properties;
 
@@ -42,7 +44,7 @@ public class ItemTest {
   public void damagedItem() throws SQLException {
     List<Item2Json.Item> items = item2json.getItemsForMfhdId(78724, voyager);
     for ( Item2Json.Item i : items ) {
-      assertEquals("2007-06-14T19:06:26.000+0000",i.itemDamagedStatusDate);
+      assertEquals("2007-06-14T15:06:26",i.itemDamagedStatusDate);
       /*
        * {"id":"8f0f2b8b-723e-111e-a053-ba1bec844b3a",
        * "hrid":"99418",
@@ -55,14 +57,14 @@ public class ItemTest {
        * "permanentLoanTypeId":"2b94c631-fca9-4892-a730-03ee529ffe27",
        * "permanentLocationId":"41589a88-8d57-4449-b36e-6ebff7c3b1b9",
        * "itemDamagedStatusId":"54d1dd76-ea33-4bcb-955b-6b29df4f7930",
-       * "itemDamagedStatusDate":"2007-06-14T19:06:26.000+0000",
+       * "itemDamagedStatusDate":"2007-06-14T15:06:26",
        * "notes":[{"itemNoteTypeId":"8d0a5eca-25de-4391-81a9-236eeefdd20b","note":"damaged","staffOnly":"false"}]}
        */
     }
 
     items = item2json.getItemsForMfhdId(550428, voyager);
     for ( Item2Json.Item i : items ) {
-      assertEquals("2020-03-03T17:50:02.000+0000",i.itemDamagedStatusDate);
+      assertEquals("2020-03-03T12:50:02",i.itemDamagedStatusDate);
       /*
        * {"id":"8f0f2ba0-5d91-111e-a053-ba1bec844b3a",
        * "hrid":"1564194",
@@ -75,7 +77,7 @@ public class ItemTest {
        * "permanentLoanTypeId":"2b94c631-fca9-4892-a730-03ee529ffe27",
        * "permanentLocationId":"41589a88-8d57-4449-b36e-6ebff7c3b1b9",
        * "itemDamagedStatusId":"54d1dd76-ea33-4bcb-955b-6b29df4f7930",
-       * "itemDamagedStatusDate":"2020-03-03T17:50:02.000+0000"}
+       * "itemDamagedStatusDate":"2020-03-03T12:50:02"}
        */
     }
   }
@@ -102,4 +104,5 @@ public class ItemTest {
        */
     }
   }
+
 }

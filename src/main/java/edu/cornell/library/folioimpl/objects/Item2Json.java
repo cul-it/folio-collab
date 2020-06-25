@@ -6,6 +6,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -77,10 +78,14 @@ public class Item2Json {
   public enum VoyagerStatus {
     NIL ("not used do not remove 0-th entry",null),
     NC  ("Not Charged",           FolioStatus.AVAIL),
-    C   ("Charged",               FolioStatus.CHECKEDOUT),
+/*  C   ("Charged",               FolioStatus.CHECKEDOUT),
     R   ("Renewed",               FolioStatus.CHECKEDOUT),
     O   ("Overdue",               FolioStatus.CHECKEDOUT),
-    RR  ("Recall Request",        FolioStatus.CHECKEDOUT),
+    RR  ("Recall Request",        FolioStatus.CHECKEDOUT),*/
+    C   ("Charged",               FolioStatus.AVAIL),
+    R   ("Renewed",               FolioStatus.AVAIL),
+    O   ("Overdue",               FolioStatus.AVAIL),
+    RR  ("Recall Request",        FolioStatus.AVAIL),
     HR  ("Hold Request",          FolioStatus.PAGED),
     OH  ("On Hold",               FolioStatus.PICKUP),
     IT  ("In Transit",            FolioStatus.TRANSIT),
@@ -93,9 +98,12 @@ public class Item2Json {
     CRET("Claims Returned",       FolioStatus.CLAIMED),
     D   ("Damaged",               FolioStatus.AVAIL),
     W   ("Withdrawn",             FolioStatus.WITHDRAWN),
-    AB  ("At Bindery",            FolioStatus.CHECKEDOUT),
+/*  AB  ("At Bindery",            FolioStatus.CHECKEDOUT),
     CATR("Cataloging Review",     FolioStatus.CHECKEDOUT),
-    CRCR("Circulation Review",    FolioStatus.CHECKEDOUT),
+    CRCR("Circulation Review",    FolioStatus.CHECKEDOUT),*/
+    AB  ("At Bindery",            FolioStatus.AVAIL),
+    CATR("Cataloging Review",     FolioStatus.AVAIL),
+    CRCR("Circulation Review",    FolioStatus.AVAIL),
     S   ("Scheduled",             FolioStatus.PAGED),
     IP  ("In Process",            FolioStatus.PROCESS),
     CSR ("Call Slip Request",     FolioStatus.PAGED),
@@ -210,7 +218,6 @@ public class Item2Json {
     while (results.next()) {
 
       Item i = new Item();
-      boolean barCodeFlag = false;
 
       i.hrid = String.valueOf(results.getInt("item_id"));
       i.id = results.getString("uuid");
@@ -222,7 +229,6 @@ public class Item2Json {
         i.mfhdId = results.getString("mfhd_id");
       }
       i.barcode = results.getString("item_barcode");
-      if (i.barcode == null) barCodeFlag = true;
       i.enumeration = results.getString("item_enum");
       i.chronology = results.getString("chron");
       i.copyNumbers.add(results.getString("copy_number"));
@@ -236,7 +242,8 @@ public class Item2Json {
       Timestamp damagedDate = results.getTimestamp("damaged_date");
       if ( damagedDate != null ) {
         i.itemDamagedStatusId = this.itemDamagedStatuses.getUuid("Damaged");
-        i.itemDamagedStatusDate = damagedDate.toInstant().toString().substring(0, 19)+".000+0000";
+        i.itemDamagedStatusDate =
+            damagedDate.toInstant().atZone(ZoneId.of("America/New_York")).toString().substring(0, 19);
       }
 
       String permType = this.itemTypeHash.get(results.getInt("item_type_id"));
@@ -270,10 +277,6 @@ public class Item2Json {
         i.notes.add(noteMap);
       }
 
-      if (barCodeFlag) {
-        System.out.println("Empty item - no barcode status 1 " + i.hrid);
-
-      }
       items.add(i);
     }
 
