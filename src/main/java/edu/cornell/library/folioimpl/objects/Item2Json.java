@@ -221,7 +221,11 @@ public class Item2Json {
 
       i.hrid = String.valueOf(results.getInt("item_id"));
       i.id = results.getString("uuid");
-      i.materialTypeId = this.materialTypes.getUuid(results.getString("mt"));
+      String mt = results.getString("mt");
+      if ( mt == null || mt.equals("unknown") ) {
+        i.materialTypeId = this.materialTypes.getUuid("unspecified");
+      } else
+        i.materialTypeId = this.materialTypes.getUuid(mt);
       try {
         results.findColumn("mfhd_uuid");
         i.holdingsRecordId = results.getString("mfhd_uuid");
