@@ -251,11 +251,11 @@ public class Item2Json {
       }
 
       String permType = this.itemTypeHash.get(results.getInt("item_type_id"));
-      if (permType != null)
+      if (permType != null && loanTypeHash.containsKey(permType))
         i.permanentLoanTypeId = this.loanTypes.getUuid(loanTypeHash.get(permType));
 
       String tempType = this.itemTypeHash.get(results.getInt("temp_item_type_id"));
-      if (tempType != null)
+      if (tempType != null && loanTypeHash.containsKey(tempType))
         i.temporaryLoanTypeId = this.loanTypes.getUuid(loanTypeHash.get(tempType));
 
       String permLoc = this.locations.getUuid(results.getString("perm_location"));
