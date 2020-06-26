@@ -238,10 +238,13 @@ public class Item2Json {
       i.copyNumbers.add(results.getString("copy_number"));
       i.numberOfPieces = results.getInt("pieces");
 
-      String[] statusParts = results.getString("comp_status").split("\\|");
-      i.status.put("name", this.voyagerStatuses[Integer.parseInt(statusParts[1])].toString() );
-      if (!"<null>".equals(statusParts[2]))
-        i.status.put("date", statusParts[2]);
+      String comp_status = results.getString("comp_status");
+      if (comp_status != null) {
+        String[] statusParts = comp_status.split("\\|");
+        i.status.put("name", this.voyagerStatuses[Integer.parseInt(statusParts[1])].toString() );
+        if (!"<null>".equals(statusParts[2]))
+          i.status.put("date", statusParts[2]);
+      }
 
       Timestamp damagedDate = results.getTimestamp("damaged_date");
       if ( damagedDate != null ) {
