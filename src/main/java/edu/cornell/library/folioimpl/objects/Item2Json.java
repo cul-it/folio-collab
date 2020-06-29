@@ -235,7 +235,7 @@ public class Item2Json {
       i.barcode = results.getString("item_barcode");
       i.enumeration = results.getString("item_enum");
       i.chronology = results.getString("chron");
-      i.copyNumbers.add(results.getString("copy_number"));
+      i.copyNumber = results.getString("copy_number");
       i.numberOfPieces = results.getInt("pieces");
 
       String comp_status = results.getString("comp_status");
@@ -300,7 +300,7 @@ public class Item2Json {
     public String barcode = null;
     public String enumeration = null;
     public String chronology = null;
-    public List<String> copyNumbers = new ArrayList<>();
+    public String copyNumber = null;
     public Integer numberOfPieces = null;
     public Map<String,String> status = new HashMap<>();
     public String permanentLoanTypeId = null;
