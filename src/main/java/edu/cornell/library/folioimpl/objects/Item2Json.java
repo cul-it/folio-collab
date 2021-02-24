@@ -378,8 +378,7 @@ public class Item2Json {
         i.mfhdId = results.getString("mfhd_id");
       }
       i.barcode = results.getString("item_barcode");
-      i.enumeration = results.getString("item_enum");
-      i.chronology = results.getString("chron");
+
       i.copyNumber = results.getString("copy_number");
       i.numberOfPieces = results.getInt("pieces");
 
@@ -424,6 +423,15 @@ public class Item2Json {
         i.temporaryLocationId = this.locations.getUuid( vLoc.code );
       }
 
+      i.enumeration = results.getString("item_enum");
+      String chron = results.getString("chron");
+      if ( chron != null ) {
+        if (isRMC && chron.equalsIgnoreCase("RESTRICTIONS"))
+          addNote(i,chron,(this.itemNoteTypes.getUuid("Restrictions")));
+        else
+          i.chronology = chron;
+      }
+
       String note = results.getString("item_note");
       if (note != null)
         addNote(i,note,this.itemNoteTypes.getUuid("Note"));
@@ -437,8 +445,7 @@ public class Item2Json {
         addNote(i,spine,(isRMC)?this.itemNoteTypes.getUuid("Vault location"):this.itemNoteTypes.getUuid("Note"));
       String caption = results.getString("caption");
       if ( caption != null && ! caption.isEmpty() )
-        addNote(i,caption,(isRMC && caption.equalsIgnoreCase("RESTRICTIONS"))
-            ?this.itemNoteTypes.getUuid("Restrictions"):this.itemNoteTypes.getUuid("Note"));
+        addNote(i,caption,this.itemNoteTypes.getUuid("Note"));
 
       if (this.circulationNotes.containsKey(itemId))
         addCirculationNotes(i,this.circulationNotes.get(itemId));
