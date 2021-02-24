@@ -426,7 +426,7 @@ public class Item2Json {
       i.enumeration = results.getString("item_enum");
       String chron = results.getString("chron");
       if ( chron != null ) {
-        if (isRMC && chron.equalsIgnoreCase("RESTRICTIONS"))
+        if (isRMC && chron.equalsIgnoreCase("RESTRICTED"))
           addNote(i,chron,(this.itemNoteTypes.getUuid("Restrictions")));
         else
           i.chronology = chron;
