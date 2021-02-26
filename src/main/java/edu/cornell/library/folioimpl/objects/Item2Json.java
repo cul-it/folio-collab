@@ -12,9 +12,11 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -69,116 +71,148 @@ public class Item2Json {
     loanTypeHash.put("visual", "Circulating");
   }
 
-  public static Map<Integer, String> vItemType2fMaterialType = new HashMap<>();
+  public static Map<Integer, MaterialType> vItemType2fMaterialType = new HashMap<>();
   static {
-    vItemType2fMaterialType.put(8, "Archival Manuscript");
-    vItemType2fMaterialType.put(3, "Book");
-    vItemType2fMaterialType.put(4, "Computer File");
-    vItemType2fMaterialType.put(35,"Equipment");
-    vItemType2fMaterialType.put(37,"Keys");
-    vItemType2fMaterialType.put(36,"Laptop");
-    vItemType2fMaterialType.put(6, "Map");
-    vItemType2fMaterialType.put(21,"Map");
-    vItemType2fMaterialType.put(19,"Microform");
-    vItemType2fMaterialType.put(5, "Music");
-    vItemType2fMaterialType.put(25,"Book");
-    vItemType2fMaterialType.put(20,"Newspaper");
-    vItemType2fMaterialType.put(15,"Periodical");
-    vItemType2fMaterialType.put(2, "Serial");
-    vItemType2fMaterialType.put(18,"Sound Recording");
-    vItemType2fMaterialType.put(40,"Umbrella");
-    vItemType2fMaterialType.put(39,"Unbound");
-    vItemType2fMaterialType.put(7, "Visual Material");
+    vItemType2fMaterialType.put(  8, MaterialType.ARCHIVE);
+    vItemType2fMaterialType.put(  3, MaterialType.BOOK);
+    vItemType2fMaterialType.put(  4, MaterialType.FILE);
+    vItemType2fMaterialType.put( 35, MaterialType.EQUIP);
+    vItemType2fMaterialType.put( 37, MaterialType.KEYS);
+    vItemType2fMaterialType.put( 36, MaterialType.LAPTOP);
+    vItemType2fMaterialType.put(  6, MaterialType.MAP);
+    vItemType2fMaterialType.put( 21, MaterialType.MAP);
+    vItemType2fMaterialType.put( 19, MaterialType.MICRO);
+    vItemType2fMaterialType.put(  5, MaterialType.MUSIC);
+    vItemType2fMaterialType.put( 25, MaterialType.BOOK);
+    vItemType2fMaterialType.put( 20, MaterialType.NEWS);
+    vItemType2fMaterialType.put( 15, MaterialType.PERIODICAL);
+    vItemType2fMaterialType.put(  2, MaterialType.SERIAL);
+    vItemType2fMaterialType.put( 18, MaterialType.SOUND);
+    vItemType2fMaterialType.put( 40, MaterialType.UMBRELLA);
+    vItemType2fMaterialType.put( 39, MaterialType.UNBOUND);
+    vItemType2fMaterialType.put(  7, MaterialType.VISUAL);
 }
 
-  public static Map<String, String> bibFormat2fMaterialType = new HashMap<>();
+  public static Map<String, MaterialType> bibFormat2fMaterialType = new HashMap<>();
   static {
-    bibFormat2fMaterialType.put("aa", "Book");
-    bibFormat2fMaterialType.put("ab", "Book");
-    bibFormat2fMaterialType.put("ac", "Book");
-    bibFormat2fMaterialType.put("ad", "Book");
-    bibFormat2fMaterialType.put("am", "Book");
-    bibFormat2fMaterialType.put("as", "Serial");
-    bibFormat2fMaterialType.put("ai", "Textual resource");
-    bibFormat2fMaterialType.put("ca", "Music");
-    bibFormat2fMaterialType.put("cb", "Music");
-    bibFormat2fMaterialType.put("cc", "Music");
-    bibFormat2fMaterialType.put("cd", "Music");
-    bibFormat2fMaterialType.put("cm", "Music");
-    bibFormat2fMaterialType.put("cs", "Music");
-    bibFormat2fMaterialType.put("da", "Music");
-    bibFormat2fMaterialType.put("db", "Music");
-    bibFormat2fMaterialType.put("dc", "Music");
-    bibFormat2fMaterialType.put("dd", "Music");
-    bibFormat2fMaterialType.put("dm", "Music");
-    bibFormat2fMaterialType.put("ds", "Music");
-    bibFormat2fMaterialType.put("ea", "Map");
-    bibFormat2fMaterialType.put("eb", "Map");
-    bibFormat2fMaterialType.put("ec", "Map");
-    bibFormat2fMaterialType.put("ed", "Map");
-    bibFormat2fMaterialType.put("em", "Map");
-    bibFormat2fMaterialType.put("es", "Map");
-    bibFormat2fMaterialType.put("fa", "Map");
-    bibFormat2fMaterialType.put("fb", "Map");
-    bibFormat2fMaterialType.put("fc", "Map");
-    bibFormat2fMaterialType.put("fd", "Map");
-    bibFormat2fMaterialType.put("fm", "Map");
-    bibFormat2fMaterialType.put("fs", "Map");
-    bibFormat2fMaterialType.put("ga", "Visual Material");
-    bibFormat2fMaterialType.put("gb", "Visual Material");
-    bibFormat2fMaterialType.put("gc", "Visual Material");
-    bibFormat2fMaterialType.put("gd", "Visual Material");
-    bibFormat2fMaterialType.put("gm", "Visual Material");
-    bibFormat2fMaterialType.put("gs", "Visual Material");
-    bibFormat2fMaterialType.put("ia", "Recording: Nonmusic");
-    bibFormat2fMaterialType.put("ib", "Recording: Nonmusic");
-    bibFormat2fMaterialType.put("ic", "Recording: Nonmusic");
-    bibFormat2fMaterialType.put("id", "Recording: Nonmusic");
-    bibFormat2fMaterialType.put("im", "Recording: Nonmusic");
-    bibFormat2fMaterialType.put("is", "Recording: Nonmusic");
-    bibFormat2fMaterialType.put("ja", "Recording: Music");
-    bibFormat2fMaterialType.put("jb", "Recording: Music");
-    bibFormat2fMaterialType.put("jc", "Recording: Music");
-    bibFormat2fMaterialType.put("jd", "Recording: Music");
-    bibFormat2fMaterialType.put("jm", "Recording: Music");
-    bibFormat2fMaterialType.put("js", "Recording: Music");
-    bibFormat2fMaterialType.put("ka", "Visual Material");
-    bibFormat2fMaterialType.put("kb", "Visual Material");
-    bibFormat2fMaterialType.put("kc", "Visual Material");
-    bibFormat2fMaterialType.put("kd", "Visual Material");
-    bibFormat2fMaterialType.put("km", "Visual Material");
-    bibFormat2fMaterialType.put("ks", "Visual Material");
-    bibFormat2fMaterialType.put("ma", "Computer File");
-    bibFormat2fMaterialType.put("mb", "Computer File");
-    bibFormat2fMaterialType.put("mc", "Computer File");
-    bibFormat2fMaterialType.put("md", "Computer File");
-    bibFormat2fMaterialType.put("mm", "Computer File");
-    bibFormat2fMaterialType.put("ms", "Computer File");
-    bibFormat2fMaterialType.put("oa", "Visual Material");
-    bibFormat2fMaterialType.put("ob", "Visual Material");
-    bibFormat2fMaterialType.put("oc", "Visual Material");
-    bibFormat2fMaterialType.put("od", "Visual Material");
-    bibFormat2fMaterialType.put("om", "Visual Material");
-    bibFormat2fMaterialType.put("os", "Visual Material");
-    bibFormat2fMaterialType.put("pa", "Archival Manuscript");
-    bibFormat2fMaterialType.put("pb", "Archival Manuscript");
-    bibFormat2fMaterialType.put("pc", "Archival Manuscript");
-    bibFormat2fMaterialType.put("pd", "Archival Manuscript");
-    bibFormat2fMaterialType.put("pm", "Archival Manuscript");
-    bibFormat2fMaterialType.put("ps", "Archival Manuscript");
-    bibFormat2fMaterialType.put("ra", "3-dimensional Object");
-    bibFormat2fMaterialType.put("rb", "3-dimensional Object");
-    bibFormat2fMaterialType.put("rc", "3-dimensional Object");
-    bibFormat2fMaterialType.put("rd", "3-dimensional Object");
-    bibFormat2fMaterialType.put("rm", "3-dimensional Object");
-    bibFormat2fMaterialType.put("rs", "3-dimensional Object");
-    bibFormat2fMaterialType.put("ta", "Book");
-    bibFormat2fMaterialType.put("tb", "Book");
-    bibFormat2fMaterialType.put("tc", "Book");
-    bibFormat2fMaterialType.put("td", "Book");
-    bibFormat2fMaterialType.put("tm", "Book");
-    bibFormat2fMaterialType.put("ts", "Serial");
+    bibFormat2fMaterialType.put("aa", MaterialType.BOOK);
+    bibFormat2fMaterialType.put("ab", MaterialType.BOOK);
+    bibFormat2fMaterialType.put("ac", MaterialType.BOOK);
+    bibFormat2fMaterialType.put("ad", MaterialType.BOOK);
+    bibFormat2fMaterialType.put("am", MaterialType.BOOK);
+    bibFormat2fMaterialType.put("as", MaterialType.SERIAL);
+    bibFormat2fMaterialType.put("ai", MaterialType.TEXT);
+    bibFormat2fMaterialType.put("ca", MaterialType.MUSIC);
+    bibFormat2fMaterialType.put("cb", MaterialType.MUSIC);
+    bibFormat2fMaterialType.put("cc", MaterialType.MUSIC);
+    bibFormat2fMaterialType.put("cd", MaterialType.MUSIC);
+    bibFormat2fMaterialType.put("cm", MaterialType.MUSIC);
+    bibFormat2fMaterialType.put("cs", MaterialType.MUSIC);
+    bibFormat2fMaterialType.put("da", MaterialType.MUSIC);
+    bibFormat2fMaterialType.put("db", MaterialType.MUSIC);
+    bibFormat2fMaterialType.put("dc", MaterialType.MUSIC);
+    bibFormat2fMaterialType.put("dd", MaterialType.MUSIC);
+    bibFormat2fMaterialType.put("dm", MaterialType.MUSIC);
+    bibFormat2fMaterialType.put("ds", MaterialType.MUSIC);
+    bibFormat2fMaterialType.put("ea", MaterialType.MAP);
+    bibFormat2fMaterialType.put("eb", MaterialType.MAP);
+    bibFormat2fMaterialType.put("ec", MaterialType.MAP);
+    bibFormat2fMaterialType.put("ed", MaterialType.MAP);
+    bibFormat2fMaterialType.put("em", MaterialType.MAP);
+    bibFormat2fMaterialType.put("es", MaterialType.MAP);
+    bibFormat2fMaterialType.put("fa", MaterialType.MAP);
+    bibFormat2fMaterialType.put("fb", MaterialType.MAP);
+    bibFormat2fMaterialType.put("fc", MaterialType.MAP);
+    bibFormat2fMaterialType.put("fd", MaterialType.MAP);
+    bibFormat2fMaterialType.put("fm", MaterialType.MAP);
+    bibFormat2fMaterialType.put("fs", MaterialType.MAP);
+    bibFormat2fMaterialType.put("ga", MaterialType.VISUAL);
+    bibFormat2fMaterialType.put("gb", MaterialType.VISUAL);
+    bibFormat2fMaterialType.put("gc", MaterialType.VISUAL);
+    bibFormat2fMaterialType.put("gd", MaterialType.VISUAL);
+    bibFormat2fMaterialType.put("gm", MaterialType.VISUAL);
+    bibFormat2fMaterialType.put("gs", MaterialType.VISUAL);
+    bibFormat2fMaterialType.put("ia", MaterialType.REC_NONMUS);
+    bibFormat2fMaterialType.put("ib", MaterialType.REC_NONMUS);
+    bibFormat2fMaterialType.put("ic", MaterialType.REC_NONMUS);
+    bibFormat2fMaterialType.put("id", MaterialType.REC_NONMUS);
+    bibFormat2fMaterialType.put("im", MaterialType.REC_NONMUS);
+    bibFormat2fMaterialType.put("is", MaterialType.REC_NONMUS);
+    bibFormat2fMaterialType.put("ja", MaterialType.REC_MUS);
+    bibFormat2fMaterialType.put("jb", MaterialType.REC_MUS);
+    bibFormat2fMaterialType.put("jc", MaterialType.REC_MUS);
+    bibFormat2fMaterialType.put("jd", MaterialType.REC_MUS);
+    bibFormat2fMaterialType.put("jm", MaterialType.REC_MUS);
+    bibFormat2fMaterialType.put("js", MaterialType.REC_MUS);
+    bibFormat2fMaterialType.put("ka", MaterialType.VISUAL);
+    bibFormat2fMaterialType.put("kb", MaterialType.VISUAL);
+    bibFormat2fMaterialType.put("kc", MaterialType.VISUAL);
+    bibFormat2fMaterialType.put("kd", MaterialType.VISUAL);
+    bibFormat2fMaterialType.put("km", MaterialType.VISUAL);
+    bibFormat2fMaterialType.put("ks", MaterialType.VISUAL);
+    bibFormat2fMaterialType.put("ma", MaterialType.FILE);
+    bibFormat2fMaterialType.put("mb", MaterialType.FILE);
+    bibFormat2fMaterialType.put("mc", MaterialType.FILE);
+    bibFormat2fMaterialType.put("md", MaterialType.FILE);
+    bibFormat2fMaterialType.put("mm", MaterialType.FILE);
+    bibFormat2fMaterialType.put("ms", MaterialType.FILE);
+    bibFormat2fMaterialType.put("oa", MaterialType.VISUAL);
+    bibFormat2fMaterialType.put("ob", MaterialType.VISUAL);
+    bibFormat2fMaterialType.put("oc", MaterialType.VISUAL);
+    bibFormat2fMaterialType.put("od", MaterialType.VISUAL);
+    bibFormat2fMaterialType.put("om", MaterialType.VISUAL);
+    bibFormat2fMaterialType.put("os", MaterialType.VISUAL);
+    bibFormat2fMaterialType.put("pa", MaterialType.ARCHIVE);
+    bibFormat2fMaterialType.put("pb", MaterialType.ARCHIVE);
+    bibFormat2fMaterialType.put("pc", MaterialType.ARCHIVE);
+    bibFormat2fMaterialType.put("pd", MaterialType.ARCHIVE);
+    bibFormat2fMaterialType.put("pm", MaterialType.ARCHIVE);
+    bibFormat2fMaterialType.put("ps", MaterialType.ARCHIVE);
+    bibFormat2fMaterialType.put("ra", MaterialType.THREE_D);
+    bibFormat2fMaterialType.put("rb", MaterialType.THREE_D);
+    bibFormat2fMaterialType.put("rc", MaterialType.THREE_D);
+    bibFormat2fMaterialType.put("rd", MaterialType.THREE_D);
+    bibFormat2fMaterialType.put("rm", MaterialType.THREE_D);
+    bibFormat2fMaterialType.put("rs", MaterialType.THREE_D);
+    bibFormat2fMaterialType.put("ta", MaterialType.BOOK);
+    bibFormat2fMaterialType.put("tb", MaterialType.BOOK);
+    bibFormat2fMaterialType.put("tc", MaterialType.BOOK);
+    bibFormat2fMaterialType.put("td", MaterialType.BOOK);
+    bibFormat2fMaterialType.put("tm", MaterialType.BOOK);
+    bibFormat2fMaterialType.put("ts", MaterialType.SERIAL);
   }
+
+
+  private enum MaterialType {
+    ARCHIVE("Archival Manuscript"),
+    BOOK("Book"),
+    FILE("Computer File"),
+    EQUIP("Equipment"),
+    KEYS("Keys"),
+    LAPTOP("Laptop"),
+    MAP("Map"),
+    MICRO("Microform"),
+    MUSIC("Music"),
+    NEWS("Newspaper"),
+    PERIODICAL("Periodical"),
+    SERIAL("Serial"),
+    SOUND("Sound Recording"),
+    UMBRELLA("Umbrella"),
+    UNBOUND("Unbound"),
+    VISUAL("Visual Material"),
+
+    REC_MUS("Recording: Music"),
+    REC_NONMUS("Recording: Nonmusic"),
+    TEXT("Textual resource"),
+    THREE_D("3-dimensional Object"),
+
+    XXX("Unspecified");
+
+    final private String value;
+    private MaterialType(String value) { this.value = value; }
+    @Override public String toString() { return this.value; }
+  }
+
 
   public enum FolioStatus {
     AVAIL("Available"),      PICKUP("Awaiting pickup"),   CHECKEDOUT("Checked out"),
@@ -193,10 +227,6 @@ public class Item2Json {
   public enum VoyagerStatus {
     NIL ("not used do not remove 0-th entry",null),
     NC  ("Not Charged",           FolioStatus.AVAIL),
-/*  C   ("Charged",               FolioStatus.CHECKEDOUT),
-    R   ("Renewed",               FolioStatus.CHECKEDOUT),
-    O   ("Overdue",               FolioStatus.CHECKEDOUT),
-    RR  ("Recall Request",        FolioStatus.CHECKEDOUT),*/
     C   ("Charged",               FolioStatus.AVAIL),
     R   ("Renewed",               FolioStatus.AVAIL),
     O   ("Overdue",               FolioStatus.AVAIL),
@@ -213,9 +243,6 @@ public class Item2Json {
     CRET("Claims Returned",       FolioStatus.CLAIMED),
     D   ("Damaged",               FolioStatus.AVAIL),
     W   ("Withdrawn",             FolioStatus.WITHDRAWN),
-/*  AB  ("At Bindery",            FolioStatus.CHECKEDOUT),
-    CATR("Cataloging Review",     FolioStatus.CHECKEDOUT),
-    CRCR("Circulation Review",    FolioStatus.CHECKEDOUT),*/
     AB  ("At Bindery",            FolioStatus.AVAIL),
     CATR("Cataloging Review",     FolioStatus.AVAIL),
     CRCR("Circulation Review",    FolioStatus.AVAIL),
@@ -249,6 +276,7 @@ public class Item2Json {
   final VoyagerLocations voyLocations;
   final ReferenceData itemDamagedStatuses;
   final Map<Integer,Map<VoyagerStatus,Timestamp>> circulationNotes;
+  final Set<Integer> undatedAvailStatuses;
   public Item2Json ( Connection voyager, OkapiClient okapi ) throws IOException, SQLException {
 
     this.itemNoteTypes = new ReferenceData(okapi, "/item-note-types", "name");
@@ -259,6 +287,8 @@ public class Item2Json {
     this.voyLocations = new VoyagerLocations( voyager );
     this.itemTypeHash = getItemTypes( voyager );
 
+    validateMaterialTypes();
+
     try ( Statement stmt = voyager.createStatement()) {
       stmt.setFetchSize(100_000);
       try ( ResultSet rs = stmt.executeQuery("SELECT * FROM item_status WHERE item_status IN (19,20)") ) {
@@ -268,8 +298,25 @@ public class Item2Json {
           VoyagerStatus status = (rs.getInt("item_status")==19)?VoyagerStatus.CATR:VoyagerStatus.CRCR;
           if ( ! this.circulationNotes.containsKey(itemId)) this.circulationNotes.put(itemId, new HashMap<>());
           this.circulationNotes.get(itemId).put(status, rs.getTimestamp("item_status_date"));
-        }}}
+        }}
+      try ( ResultSet rs = stmt.executeQuery(
+          "SELECT item_id FROM item_status WHERE item_status = 1 and item_status_date is null") ) {
+        this.undatedAvailStatuses = new HashSet<>();
+        while ( rs.next() ) this.undatedAvailStatuses.add( rs.getInt("item_id") );
+      }
+    }
 
+  }
+
+
+  private void validateMaterialTypes() {
+    for (MaterialType mt : MaterialType.values()) {
+      String uuid = this.materialTypes.getUuid(mt.toString());
+      if ( uuid == null || uuid.isEmpty() ) {
+        System.out.printf("Material type '%s' not present in Folio.\n",mt.toString());
+        System.exit(1);
+      }
+    }
   }
 
 
@@ -363,13 +410,13 @@ public class Item2Json {
       int itemId = Integer.valueOf(i.hrid);
       int itemTypeId = results.getInt("item_type_id");
       if ( vItemType2fMaterialType.containsKey(itemTypeId) ) {
-        i.materialTypeId = this.materialTypes.getUuid(vItemType2fMaterialType.get(itemTypeId));
+        i.materialTypeId = this.materialTypes.getUuid(vItemType2fMaterialType.get(itemTypeId).toString());
       } else {
         String bibFormat = results.getString("bib_format");
         if ( bibFormat != null && bibFormat2fMaterialType.containsKey(bibFormat) )
-          i.materialTypeId = this.materialTypes.getUuid(bibFormat);
+          i.materialTypeId = this.materialTypes.getUuid(bibFormat2fMaterialType.get(bibFormat).toString());
         else
-          i.materialTypeId = this.materialTypes.getUuid("unspecified");
+          i.materialTypeId = this.materialTypes.getUuid(MaterialType.XXX.toString());
       }
       try {
         results.findColumn("mfhd_uuid");
@@ -382,11 +429,12 @@ public class Item2Json {
       i.copyNumber = results.getString("copy_number");
       i.numberOfPieces = results.getInt("pieces");
 
-      if ( results.getString("avail_date") != null ) {
-        i.status.put("name", "Available");
+      i.status.put("name", "Available");
+      if ( results.getString("avail_date") != null )
         i.status.put("date", results.getTimestamp("avail_date").toInstant()
             .atZone(ZoneId.of("America/New_York")).toString().substring(0, 19));
-      }
+      else if ( ! this.undatedAvailStatuses.contains(itemId) ) 
+        i.status.put("date", "1978-04-06T03:21:00");
 
       Timestamp damagedDate = results.getTimestamp("damaged_date");
       if ( damagedDate != null ) {
@@ -466,6 +514,7 @@ public class Item2Json {
         note.put("note", String.format("%s (%s)", e.getKey().value,e.getValue().toLocalDateTime().format(formatter)));
         note.put("date", e.getValue().toInstant().atZone(ZoneId.of("America/New_York")).toString().substring(0, 19));
       }
+      i.circulationNotes.add(note);
     }
   }
 
@@ -534,5 +583,4 @@ public class Item2Json {
     }
     return res;
   }
-
 }
