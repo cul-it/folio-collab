@@ -431,16 +431,14 @@ public class Item2Json {
 
       i.status.put("name", "Available");
       if ( results.getString("avail_date") != null )
-        i.status.put("date", results.getTimestamp("avail_date").toInstant()
-            .atZone(ZoneId.of("America/New_York")).toString().substring(0, 19));
+        i.status.put("date", results.getTimestamp("avail_date").toInstant().toString());
       else if ( ! this.undatedAvailStatuses.contains(itemId) ) 
-        i.status.put("date", "1978-04-06T03:21:00");
+        i.status.put("date", "1978-04-06T03:21:00Z");
 
       Timestamp damagedDate = results.getTimestamp("damaged_date");
       if ( damagedDate != null ) {
         i.itemDamagedStatusId = this.itemDamagedStatuses.getUuid("Damaged");
-        i.itemDamagedStatusDate =
-            damagedDate.toInstant().atZone(ZoneId.of("America/New_York")).toString().substring(0, 19);
+        i.itemDamagedStatusDate = damagedDate.toInstant().toString();
       }
 
       String createOperator = results.getString("create_operator_id");
@@ -512,7 +510,7 @@ public class Item2Json {
         note.put("note", e.getKey().value);
       else {
         note.put("note", String.format("%s (%s)", e.getKey().value,e.getValue().toLocalDateTime().format(formatter)));
-        note.put("date", e.getValue().toInstant().atZone(ZoneId.of("America/New_York")).toString().substring(0, 19));
+        note.put("date", e.getValue().toInstant().toString());
       }
       i.circulationNotes.add(note);
     }
