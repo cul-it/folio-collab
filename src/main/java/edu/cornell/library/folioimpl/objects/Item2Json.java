@@ -7,10 +7,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
-import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -276,6 +276,7 @@ public class Item2Json {
   final VoyagerLocations voyLocations;
   final ReferenceData itemDamagedStatuses;
   final Map<Integer,Map<VoyagerStatus,Timestamp>> circulationNotes;
+  final Map<Integer,Map<FolioStatus,Timestamp>> mappedUnavailStatuses;
   final Set<Integer> undatedAvailStatuses;
   public Item2Json ( Connection voyager, OkapiClient okapi ) throws IOException, SQLException {
 
@@ -298,6 +299,16 @@ public class Item2Json {
           VoyagerStatus status = (rs.getInt("item_status")==19)?VoyagerStatus.CATR:VoyagerStatus.CRCR;
           if ( ! this.circulationNotes.containsKey(itemId)) this.circulationNotes.put(itemId, new HashMap<>());
           this.circulationNotes.get(itemId).put(status, rs.getTimestamp("item_status_date"));
+        }}
+      try ( ResultSet rs = stmt.executeQuery("SELECT * FROM item_status WHERE item_status IN (12,15,17)") ) {
+        this.mappedUnavailStatuses = new HashMap<>();
+        while ( rs.next() ) {
+          int itemId = rs.getInt("item_id");
+          FolioStatus status =
+              (rs.getInt("item_status")==12)?FolioStatus.MISSING:
+                (rs.getInt("item_status")==15)?FolioStatus.CLAIMED:FolioStatus.WITHDRAWN;
+          if ( ! this.mappedUnavailStatuses.containsKey(itemId)) this.mappedUnavailStatuses.put(itemId, new HashMap<>());
+          this.mappedUnavailStatuses.get(itemId).put(status, rs.getTimestamp("item_status_date"));
         }}
       try ( ResultSet rs = stmt.executeQuery(
           "SELECT item_id FROM item_status WHERE item_status = 1 and item_status_date is null") ) {
@@ -429,11 +440,21 @@ public class Item2Json {
       i.copyNumber = results.getString("copy_number");
       i.numberOfPieces = results.getInt("pieces");
 
-      i.status.put("name", "Available");
-      if ( results.getString("avail_date") != null )
-        i.status.put("date", results.getTimestamp("avail_date").toInstant().toString());
-      else if ( ! this.undatedAvailStatuses.contains(itemId) ) 
-        i.status.put("date", "1978-04-06T03:21:00Z");
+      if ( this.mappedUnavailStatuses.containsKey(itemId) ) {
+        // Look for three unavailable statuses in their Voyager priority order
+        for ( FolioStatus s : Arrays.asList(FolioStatus.MISSING, FolioStatus.WITHDRAWN, FolioStatus.CLAIMED))
+          if ( this.mappedUnavailStatuses.get(itemId).containsKey(s) ) {
+            i.status.put("name", s.name());
+            i.status.put("date", this.mappedUnavailStatuses.get(itemId).get(s).toInstant().toString());
+            break;
+          }
+      } else {
+        i.status.put("name", "Available");
+        if ( results.getString("avail_date") != null )
+          i.status.put("date", results.getTimestamp("avail_date").toInstant().toString());
+        else if ( ! this.undatedAvailStatuses.contains(itemId) ) 
+          i.status.put("date", "1978-04-06T03:21:00Z");
+      }
 
       Timestamp damagedDate = results.getTimestamp("damaged_date");
       if ( damagedDate != null ) {
