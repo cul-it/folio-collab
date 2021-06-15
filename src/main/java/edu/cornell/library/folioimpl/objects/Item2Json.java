@@ -77,7 +77,7 @@ public class Item2Json {
     vItemType2fMaterialType.put(  3, MaterialType.BOOK);
     vItemType2fMaterialType.put(  4, MaterialType.FILE);
     vItemType2fMaterialType.put( 35, MaterialType.EQUIP);
-    vItemType2fMaterialType.put( 37, MaterialType.KEYS);
+    vItemType2fMaterialType.put( 37, MaterialType.EQUIP); //MaterialType.KEYS);
     vItemType2fMaterialType.put( 36, MaterialType.LAPTOP);
     vItemType2fMaterialType.put(  6, MaterialType.MAP);
     vItemType2fMaterialType.put( 21, MaterialType.MAP);
@@ -188,7 +188,7 @@ public class Item2Json {
     BOOK("Book"),
     FILE("Computer File"),
     EQUIP("Equipment"),
-    KEYS("Keys"),
+//    KEYS("Keys"),
     LAPTOP("Laptop"),
     MAP("Map"),
     MICRO("Microform"),
@@ -420,15 +420,21 @@ public class Item2Json {
       i.hrid = String.valueOf(results.getInt("item_id"));
       int itemId = Integer.valueOf(i.hrid);
       int itemTypeId = results.getInt("item_type_id");
+      MaterialType mType = null;
       if ( vItemType2fMaterialType.containsKey(itemTypeId) ) {
-        i.materialTypeId = this.materialTypes.getUuid(vItemType2fMaterialType.get(itemTypeId).toString());
+        mType = vItemType2fMaterialType.get(itemTypeId);
       } else {
         String bibFormat = results.getString("bib_format");
-        if ( bibFormat != null && bibFormat2fMaterialType.containsKey(bibFormat) )
-          i.materialTypeId = this.materialTypes.getUuid(bibFormat2fMaterialType.get(bibFormat).toString());
-        else
-          i.materialTypeId = this.materialTypes.getUuid(MaterialType.XXX.toString());
+        if ( bibFormat != null && bibFormat2fMaterialType.containsKey(bibFormat) ) {
+          mType = bibFormat2fMaterialType.get(bibFormat);
+        } else {
+          mType = MaterialType.XXX;
+        }
       }
+      // Skip items entirely with particular material types
+      if (mType.equals(MaterialType.EQUIP) || mType.equals(MaterialType.LAPTOP) || mType.equals(MaterialType.UMBRELLA))
+        continue;
+      i.materialTypeId = this.materialTypes.getUuid(mType.toString());
       try {
         results.findColumn("mfhd_uuid");
         i.holdingsRecordId = results.getString("mfhd_uuid");
