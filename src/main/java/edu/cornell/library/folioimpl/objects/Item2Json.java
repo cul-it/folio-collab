@@ -78,17 +78,17 @@ public class Item2Json {
     vItemType2fMaterialType.put(  4, MaterialType.FILE);
     vItemType2fMaterialType.put( 35, MaterialType.EQUIP);
     vItemType2fMaterialType.put( 37, MaterialType.EQUIP); //MaterialType.KEYS);
-    vItemType2fMaterialType.put( 36, MaterialType.LAPTOP);
+    vItemType2fMaterialType.put( 36, MaterialType.EQUIP); //MaterialType.LAPTOP);
     vItemType2fMaterialType.put(  6, MaterialType.MAP);
     vItemType2fMaterialType.put( 21, MaterialType.MAP);
     vItemType2fMaterialType.put( 19, MaterialType.MICRO);
-    vItemType2fMaterialType.put(  5, MaterialType.MUSIC);
+    vItemType2fMaterialType.put(  5, MaterialType.SCORE);//Voyager: music
     vItemType2fMaterialType.put( 25, MaterialType.BOOK);
     vItemType2fMaterialType.put( 20, MaterialType.NEWS);
     vItemType2fMaterialType.put( 15, MaterialType.PERIODICAL);
     vItemType2fMaterialType.put(  2, MaterialType.SERIAL);
-    vItemType2fMaterialType.put( 18, MaterialType.SOUND);
-    vItemType2fMaterialType.put( 40, MaterialType.UMBRELLA);
+    vItemType2fMaterialType.put( 18, MaterialType.SOUND);//Voyager: soundrec
+    vItemType2fMaterialType.put( 40, MaterialType.EQUIP); //MaterialType.UMBRELLA);
     vItemType2fMaterialType.put( 39, MaterialType.UNBOUND);
     vItemType2fMaterialType.put(  7, MaterialType.VISUAL);
 }
@@ -102,18 +102,18 @@ public class Item2Json {
     bibFormat2fMaterialType.put("am", MaterialType.BOOK);
     bibFormat2fMaterialType.put("as", MaterialType.SERIAL);
     bibFormat2fMaterialType.put("ai", MaterialType.TEXT);
-    bibFormat2fMaterialType.put("ca", MaterialType.MUSIC);
-    bibFormat2fMaterialType.put("cb", MaterialType.MUSIC);
-    bibFormat2fMaterialType.put("cc", MaterialType.MUSIC);
-    bibFormat2fMaterialType.put("cd", MaterialType.MUSIC);
-    bibFormat2fMaterialType.put("cm", MaterialType.MUSIC);
-    bibFormat2fMaterialType.put("cs", MaterialType.MUSIC);
-    bibFormat2fMaterialType.put("da", MaterialType.MUSIC);
-    bibFormat2fMaterialType.put("db", MaterialType.MUSIC);
-    bibFormat2fMaterialType.put("dc", MaterialType.MUSIC);
-    bibFormat2fMaterialType.put("dd", MaterialType.MUSIC);
-    bibFormat2fMaterialType.put("dm", MaterialType.MUSIC);
-    bibFormat2fMaterialType.put("ds", MaterialType.MUSIC);
+    bibFormat2fMaterialType.put("ca", MaterialType.SCORE);
+    bibFormat2fMaterialType.put("cb", MaterialType.SCORE);
+    bibFormat2fMaterialType.put("cc", MaterialType.SCORE);
+    bibFormat2fMaterialType.put("cd", MaterialType.SCORE);
+    bibFormat2fMaterialType.put("cm", MaterialType.SCORE);
+    bibFormat2fMaterialType.put("cs", MaterialType.SCORE);
+    bibFormat2fMaterialType.put("da", MaterialType.SCORE);
+    bibFormat2fMaterialType.put("db", MaterialType.SCORE);
+    bibFormat2fMaterialType.put("dc", MaterialType.SCORE);
+    bibFormat2fMaterialType.put("dd", MaterialType.SCORE);
+    bibFormat2fMaterialType.put("dm", MaterialType.SCORE);
+    bibFormat2fMaterialType.put("ds", MaterialType.SCORE);
     bibFormat2fMaterialType.put("ea", MaterialType.MAP);
     bibFormat2fMaterialType.put("eb", MaterialType.MAP);
     bibFormat2fMaterialType.put("ec", MaterialType.MAP);
@@ -132,18 +132,18 @@ public class Item2Json {
     bibFormat2fMaterialType.put("gd", MaterialType.VISUAL);
     bibFormat2fMaterialType.put("gm", MaterialType.VISUAL);
     bibFormat2fMaterialType.put("gs", MaterialType.VISUAL);
-    bibFormat2fMaterialType.put("ia", MaterialType.REC_NONMUS);
-    bibFormat2fMaterialType.put("ib", MaterialType.REC_NONMUS);
-    bibFormat2fMaterialType.put("ic", MaterialType.REC_NONMUS);
-    bibFormat2fMaterialType.put("id", MaterialType.REC_NONMUS);
-    bibFormat2fMaterialType.put("im", MaterialType.REC_NONMUS);
-    bibFormat2fMaterialType.put("is", MaterialType.REC_NONMUS);
-    bibFormat2fMaterialType.put("ja", MaterialType.REC_MUS);
-    bibFormat2fMaterialType.put("jb", MaterialType.REC_MUS);
-    bibFormat2fMaterialType.put("jc", MaterialType.REC_MUS);
-    bibFormat2fMaterialType.put("jd", MaterialType.REC_MUS);
-    bibFormat2fMaterialType.put("jm", MaterialType.REC_MUS);
-    bibFormat2fMaterialType.put("js", MaterialType.REC_MUS);
+    bibFormat2fMaterialType.put("ia", MaterialType.SOUND);
+    bibFormat2fMaterialType.put("ib", MaterialType.SOUND);
+    bibFormat2fMaterialType.put("ic", MaterialType.SOUND);
+    bibFormat2fMaterialType.put("id", MaterialType.SOUND);
+    bibFormat2fMaterialType.put("im", MaterialType.SOUND);
+    bibFormat2fMaterialType.put("is", MaterialType.SOUND);
+    bibFormat2fMaterialType.put("ja", MaterialType.SOUND);
+    bibFormat2fMaterialType.put("jb", MaterialType.SOUND);
+    bibFormat2fMaterialType.put("jc", MaterialType.SOUND);
+    bibFormat2fMaterialType.put("jd", MaterialType.SOUND);
+    bibFormat2fMaterialType.put("jm", MaterialType.SOUND);
+    bibFormat2fMaterialType.put("js", MaterialType.SOUND);
     bibFormat2fMaterialType.put("ka", MaterialType.VISUAL);
     bibFormat2fMaterialType.put("kb", MaterialType.VISUAL);
     bibFormat2fMaterialType.put("kc", MaterialType.VISUAL);
@@ -168,12 +168,12 @@ public class Item2Json {
     bibFormat2fMaterialType.put("pd", MaterialType.ARCHIVE);
     bibFormat2fMaterialType.put("pm", MaterialType.ARCHIVE);
     bibFormat2fMaterialType.put("ps", MaterialType.ARCHIVE);
-    bibFormat2fMaterialType.put("ra", MaterialType.THREE_D);
-    bibFormat2fMaterialType.put("rb", MaterialType.THREE_D);
-    bibFormat2fMaterialType.put("rc", MaterialType.THREE_D);
-    bibFormat2fMaterialType.put("rd", MaterialType.THREE_D);
-    bibFormat2fMaterialType.put("rm", MaterialType.THREE_D);
-    bibFormat2fMaterialType.put("rs", MaterialType.THREE_D);
+    bibFormat2fMaterialType.put("ra", MaterialType.OBJECT);
+    bibFormat2fMaterialType.put("rb", MaterialType.OBJECT);
+    bibFormat2fMaterialType.put("rc", MaterialType.OBJECT);
+    bibFormat2fMaterialType.put("rd", MaterialType.OBJECT);
+    bibFormat2fMaterialType.put("rm", MaterialType.OBJECT);
+    bibFormat2fMaterialType.put("rs", MaterialType.OBJECT);
     bibFormat2fMaterialType.put("ta", MaterialType.BOOK);
     bibFormat2fMaterialType.put("tb", MaterialType.BOOK);
     bibFormat2fMaterialType.put("tc", MaterialType.BOOK);
@@ -184,27 +184,21 @@ public class Item2Json {
 
 
   private enum MaterialType {
-    ARCHIVE("Archival Manuscript"),
+    ARCHIVE("Archivman"),
     BOOK("Book"),
-    FILE("Computer File"),
-    EQUIP("Equipment"),
-//    KEYS("Keys"),
-    LAPTOP("Laptop"),
+    FILE("Computfile"),
+    EQUIP("Equipment"), // needed but unused? This can be cleaned up
     MAP("Map"),
     MICRO("Microform"),
-    MUSIC("Music"),
     NEWS("Newspaper"),
+    OBJECT("Object"),
     PERIODICAL("Periodical"),
+    SCORE("Music (score)"),
     SERIAL("Serial"),
-    SOUND("Sound Recording"),
-    UMBRELLA("Umbrella"),
-    UNBOUND("Unbound"),
-    VISUAL("Visual Material"),
-
-    REC_MUS("Recording: Music"),
-    REC_NONMUS("Recording: Nonmusic"),
+    SOUND("Soundrec"),
     TEXT("Textual resource"),
-    THREE_D("3-dimensional Object"),
+    UNBOUND("Unbound"),
+    VISUAL("Visual"),
 
     XXX("Unspecified");
 
@@ -431,9 +425,10 @@ public class Item2Json {
           mType = MaterialType.XXX;
         }
       }
-      // Skip items entirely with particular material types
-      if (mType.equals(MaterialType.EQUIP) || mType.equals(MaterialType.LAPTOP) || mType.equals(MaterialType.UMBRELLA))
-        continue;
+
+      // Skip laptops, keys, umbrellas & other equipment entirely
+      if (mType.equals(MaterialType.EQUIP)) continue;
+
       i.materialTypeId = this.materialTypes.getUuid(mType.toString());
       try {
         results.findColumn("mfhd_uuid");
