@@ -450,7 +450,7 @@ public class Item2Json {
         // Look for three unavailable statuses in their Voyager priority order
         for ( FolioStatus s : Arrays.asList(FolioStatus.MISSING, FolioStatus.WITHDRAWN, FolioStatus.CLAIMED))
           if ( this.mappedUnavailStatuses.get(itemId).containsKey(s) ) {
-            i.status.put("name", s.name());
+            i.status.put("name", s.toString());
             i.status.put("date", this.mappedUnavailStatuses.get(itemId).get(s).toInstant().toString());
             break;
           }
