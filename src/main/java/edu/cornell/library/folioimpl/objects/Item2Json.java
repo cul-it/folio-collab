@@ -481,14 +481,19 @@ public class Item2Json {
 
       boolean isRMC = false;
       VoyagerLocations.Location vLoc = this.voyLocations.getByNumber( results.getInt("perm_location") );
-      if ( vLoc != null ) {
+      if ( vLoc == null ) {
+        i.permanentLocationId = this.locations.getUuid( "void" );
+      } else {
         i.permanentLocationId = this.locations.getUuid( vLoc.code );
         isRMC = (vLoc.code.startsWith("rmc"));
       }
 
-      vLoc = this.voyLocations.getByNumber( results.getInt("temp_location") );
+      int tempLocNumber = results.getInt("temp_location");
+      vLoc = this.voyLocations.getByNumber( tempLocNumber );
       if ( vLoc != null ) {
         i.temporaryLocationId = this.locations.getUuid( vLoc.code );
+      } else if ( tempLocNumber > 0 ) {
+        i.temporaryLocationId = this.locations.getUuid( "void" );
       }
 
       i.enumeration = results.getString("item_enum");
