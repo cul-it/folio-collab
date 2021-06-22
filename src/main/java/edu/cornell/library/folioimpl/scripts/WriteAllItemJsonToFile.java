@@ -36,7 +36,7 @@ public class WriteAllItemJsonToFile {
       prop.load(in);
     }
 
-    OkapiClient okapi = new OkapiClient( prop.getProperty("urlFTest"), prop.getProperty("tokenFTest"), prop.getProperty("tenantFTest") );
+    OkapiClient okapi = new OkapiClient( prop.getProperty("urlFProd"), prop.getProperty("tokenFProd"), prop.getProperty("tenantFProd") );
 
     List<Integer> allItemIds = new ArrayList<>();
 

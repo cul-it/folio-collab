@@ -22,6 +22,8 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import edu.cornell.library.folioimpl.objects.VoyagerLocations.Location;
+
 public class Item2Json {
 
   public Map<Integer, String> itemTypeHash;
@@ -278,6 +280,7 @@ public class Item2Json {
     this.materialTypes = new ReferenceData(okapi, "/material-types", "name");
     this.loanTypes = new ReferenceData(okapi, "/loan-types", "name");
     this.locations = new ReferenceData(okapi, "/locations", "code");
+    System.out.println(this.locations.getUuid("void"));
     this.itemDamagedStatuses = new ReferenceData(okapi, "/item-damaged-statuses","name");
     this.voyLocations = new VoyagerLocations( voyager );
     this.itemTypeHash = getItemTypes( voyager );
@@ -480,21 +483,20 @@ public class Item2Json {
         i.temporaryLoanTypeId = this.loanTypes.getUuid(loanTypeHash.get(tempType));
 
       boolean isRMC = false;
-      VoyagerLocations.Location vLoc = this.voyLocations.getByNumber( results.getInt("perm_location") );
-      if ( vLoc == null ) {
-        i.permanentLocationId = this.locations.getUuid( "void" );
-      } else {
-        i.permanentLocationId = this.locations.getUuid( vLoc.code );
-        isRMC = (vLoc.code.startsWith("rmc"));
-      }
+      Location vLoc = this.voyLocations.getByNumber( results.getInt("perm_location") );
+      if ( vLoc != null) {
+        isRMC = vLoc.code.startsWith("rmc");
+        String permLoc = this.locations.getUuid( vLoc.code );
+        i.permanentLocationId = (permLoc == null)?this.locations.getUuid( "void" ):permLoc;
+      } else
+        i.permanentLocationId = this.locations.getUuid("void");
 
       int tempLocNumber = results.getInt("temp_location");
       vLoc = this.voyLocations.getByNumber( tempLocNumber );
-      if ( vLoc != null ) {
+      if ( vLoc != null )
         i.temporaryLocationId = this.locations.getUuid( vLoc.code );
-      } else if ( tempLocNumber > 0 ) {
+      if ( i.temporaryLocationId == null && tempLocNumber > 0 )
         i.temporaryLocationId = this.locations.getUuid( "void" );
-      }
 
       i.enumeration = results.getString("item_enum");
       String chron = results.getString("chron");
