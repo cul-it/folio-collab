@@ -297,13 +297,11 @@ public class Item2Json {
           if ( ! this.circulationNotes.containsKey(itemId)) this.circulationNotes.put(itemId, new HashMap<>());
           this.circulationNotes.get(itemId).put(status, rs.getTimestamp("item_status_date"));
         }}
-      try ( ResultSet rs = stmt.executeQuery("SELECT * FROM item_status WHERE item_status IN (12,15,17)") ) {
+      try ( ResultSet rs = stmt.executeQuery("SELECT * FROM item_status WHERE item_status IN (12,17)") ) {
         this.mappedUnavailStatuses = new HashMap<>();
         while ( rs.next() ) {
           int itemId = rs.getInt("item_id");
-          FolioStatus status =
-              (rs.getInt("item_status")==12)?FolioStatus.MISSING:
-                (rs.getInt("item_status")==15)?FolioStatus.CLAIMED:FolioStatus.WITHDRAWN;
+          FolioStatus status = (rs.getInt("item_status")==12)?FolioStatus.MISSING:FolioStatus.WITHDRAWN;
           if ( ! this.mappedUnavailStatuses.containsKey(itemId)) this.mappedUnavailStatuses.put(itemId, new HashMap<>());
           this.mappedUnavailStatuses.get(itemId).put(status, rs.getTimestamp("item_status_date"));
         }}
