@@ -81,7 +81,8 @@ public class WriteAllItemJsonToFile {
       idsByOutputFile.put(String.format("items%03d.json",i+1), splitIdLists.get(i));
 
     for (Entry<String,List<Integer>> e : idsByOutputFile.entrySet())
-      System.out.printf("%s: %d (%d)\n",e.getKey(),e.getValue().get(0),e.getValue().size());
+      System.out.printf("%s: %d-%d (%d)\n",e.getKey(),e.getValue().get(0),
+          e.getValue().get(e.getValue().size()-1),e.getValue().size());
 
 
     try ( Connection voyager = DriverManager.getConnection(
@@ -127,7 +128,7 @@ public class WriteAllItemJsonToFile {
     List<List<Integer>> splits = new ArrayList<>();
     while ( toSplits.size() > splitSize ) {
         splits.add(toSplits.subList(0, splitSize));
-        toSplits = toSplits.subList(splitSize, toSplits.size()-1);
+        toSplits = toSplits.subList(splitSize, toSplits.size());
     }
     splits.add(toSplits);
     return splits;
